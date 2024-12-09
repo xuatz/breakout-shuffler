@@ -1,0 +1,22 @@
+{
+  "importMap": ".vscode/resolve_npm_imports.json",
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "dom.asynciterable",
+      "deno.ns"
+    ]
+  },
+  "deploy": {
+    "project": "52bf16f5-72b9-47a6-a381-60a9ce609318",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [
+      "build",
+      "public"
+    ],
+    "entrypoint": "build/index.js"
+  }
+}
