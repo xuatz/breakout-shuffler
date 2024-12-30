@@ -1,32 +1,22 @@
 {
-  "name": "",
+  "name": "breakout-shuffler",
+  "version": "1.0.0",
   "private": true,
-  "sideEffects": false,
   "scripts": {
-    "build": "remix build",
-    "deploy": "deployctl deploy --prod --include=build,public --project=u-next-breakout-shuffler ./build/index.js",
-    "dev": "npm-run-all build --parallel \"dev:*\"",
-    "dev:deno": "cross-env NODE_ENV=development deno run --unstable --watch --allow-net --allow-read --allow-env ./build/index.js",
-    "dev:remix": "remix watch",
-    "format": "deno fmt --ignore=node_modules,build,public/build",
-    "lint": "deno lint --ignore=node_modules,build,public/build",
-    "start": "cross-env NODE_ENV=production deno run --unstable --allow-net --allow-read --allow-env ./build/index.js",
-    "typecheck": "deno check"
+    "dev": "pnpm -r run dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test"
   },
-  "dependencies": {
-    "@remix-run/css-bundle": "^2.15.0",
-    "@remix-run/deno": "^2.15.0",
-    "@remix-run/react": "^2.15.0",
-    "isbot": "^4.1.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
-  "devDependencies": {
-    "@remix-run/dev": "^2.15.0",
-    "cross-env": "^7.0.3",
-    "npm-run-all": "^4.1.5"
-  },
+  "author": "xuatz",
+  "license": "ISC",
+  "packageManager": "pnpm@9.12.3",
   "engines": {
-    "node": ">=18.0.0"
-  }
+    "node": ">=20.0.0",
+    "pnpm": ">=9.12.3"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }
