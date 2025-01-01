@@ -1,0 +1,9 @@
+client.breakout.local {
+    tls internal
+    reverse_proxy client:3000
+}
+
+server.breakout.local {
+    tls internal
+    reverse_proxy server:9000
+}
