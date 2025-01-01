@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { socket, sendSocketMessage, setupSocketListeners } from '~/lib/socket';
+import { socket, sendSocketMessage } from '~/lib/socket';
 
 const Chat: React.FC = () => {
   const [username, setUsername] = useState('');
   const [isUsernameSet, setIsUsernameSet] = useState(false);
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<{ user: string; text: string }[]>([]);
+  const [messages, setMessages] = useState<{ user: string; text: string }[]>(
+    []
+  );
 
   useEffect(() => {
-    // setupSocketListeners();
-
     socket.on('connect', () => {
       console.log('Connected to Socket.IO server');
     });
@@ -18,7 +18,7 @@ const Chat: React.FC = () => {
       console.log('Disconnected from Socket.IO server');
     });
 
-    socket.on('hello', (data: { user: string; text: string }) => {
+    socket.on('chat message', (data: { user: string; text: string }) => {
       setMessages((prev) => [...prev, data]);
     });
 
@@ -27,7 +27,7 @@ const Chat: React.FC = () => {
       socket.off('disconnect');
       socket.off('chat message');
     };
-  }, []);
+  }, [socket]);
 
   const handleSend = () => {
     if (message.trim() !== '' && username.trim() !== '') {

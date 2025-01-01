@@ -1,0 +1,29 @@
+services:
+  caddy:
+    image: caddy:latest
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - client
+      - server
+  client:
+    build:
+      dockerfile: ./apps/client/Dockerfile
+    environment:
+      - VITE_API_URL=https://server.breakout.local
+    expose:
+      - "3000"
+  server:
+    build:
+      dockerfile: ./apps/server/Dockerfile
+    expose:
+      - "9000"
+
+volumes:
+  caddy_data:
+  caddy_config:
