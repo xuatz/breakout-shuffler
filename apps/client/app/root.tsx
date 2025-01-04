@@ -54,7 +54,7 @@ export default function App() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [roomId, setRoomId] = useState(searchParams.get('roomId') ?? '');
 
-  const [cookies, setCookie, removeCookie] = useCookies(['_brid']);
+  const [cookies, setCookie, removeCookie] = useCookies(['_bsid']);
   useEffect(() => {
     const uniqueId = import.meta.env.PROD
       ? crypto.randomUUID()
@@ -63,8 +63,13 @@ export default function App() {
           window.crypto.getRandomValues(array);
           return array.join('-');
         })();
-    if (!cookies._brid) {
-      setCookie('_brid', uniqueId);
+    if (!cookies._bsid) {
+      setCookie('_bsid', uniqueId, {
+        path: '/',
+        secure: import.meta.env.PROD,
+        domain: import.meta.env.PROD ? 'some-other-domain' : '.breakout.local',
+        maxAge: 7 * 24 * 60 * 60,
+      });
     }
   }, []);
 
@@ -87,8 +92,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (roomId && cookies._brid) {
-      connectToRoom(roomId, cookies._brid);
+    if (roomId && cookies._bsid) {
+      connectToRoom(roomId, cookies._bsid);
     }
   }, []);
 

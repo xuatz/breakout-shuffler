@@ -21,9 +21,10 @@ export class RoomService {
     this.redis = redis;
   }
 
-  async createRoom(): Promise<{ roomId: string; hostId: string }> {
+  async createRoom(
+    hostId: string
+  ): Promise<{ roomId: string; hostId: string }> {
     const roomId = uuidv4();
-    const hostId = uuidv4();
     const room: Room = {
       id: roomId,
       hostId,
@@ -37,8 +38,23 @@ export class RoomService {
       ],
     };
 
-    await this.redis.set(`room:${roomId}`, JSON.stringify(room));
+    await Promise.all([
+      this.redis.set(`room:${roomId}`, JSON.stringify(room)),
+      this.redis.sadd(`host:${hostId}:rooms`, roomId),
+    ]);
+
     return { roomId, hostId };
+  }
+
+  async getRoomsByHost(hostBsid: string): Promise<Room[]> {
+    const roomIds = await this.redis.smembers(`host:${hostBsid}:rooms`);
+    const rooms = await Promise.all(
+      roomIds.map(async (roomId) => {
+        const room = await this.getRoom(roomId);
+        return room;
+      })
+    );
+    return rooms.filter((room): room is Room => room !== null);
   }
 
   async getRoom(roomId: string): Promise<Room | null> {
