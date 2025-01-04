@@ -1,5 +1,45 @@
 services:
+  caddy:
+    image: caddy:latest
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - client
+      - server
+  client:
+    build:
+      dockerfile: ./apps/client/Dockerfile.local
+      context: ./
+    environment:
+      - VITE_API_URL=https://server.breakout.local
+    volumes:
+      - .:/app
+      - pnpm-store:/app/.pnpm-store
+      - node_modules:/app/node_modules
+    expose:
+      - "3000"
+  server:
+    build:
+      dockerfile: ./apps/server/Dockerfile.local
+      context: ./
+    volumes:
+      - .:/app
+      - pnpm-store2:/app/.pnpm-store
+      - node_modules2:/app/node_modules
+    expose:
+      - "9000"
   redis:
     image: redis:latest
-    ports:
-      - "6379:6379"
+
+volumes:
+  caddy_data:
+  caddy_config:
+  pnpm-store:
+  node_modules:
+  pnpm-store2:
+  node_modules2:
