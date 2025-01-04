@@ -2,25 +2,32 @@
 
 ## Setup
 
-1. Ensure you have Node.js (v18+) installed
+1. Ensure you have Node.js (v20+) installed
 2. Install PNPM: `npm install -g pnpm`
 3. Install dependencies: `pnpm install`
+4. Update /etc/hosts
+
+```diff
+...
+127.0.0.1       localhost
+::1             localhost
+...
++ 127.0.0.1 client.breakout.local
++ 127.0.0.1 server.breakout.local
+```
+
+## Local Development
+
+Because this application shares the cookie between the client and server app, it is probably easier if you just the whole local dev environment with docker compose, with caddy (and redis) setup already.
+
+1. install docker
+2. docker compose up -d
+3. visit https://client.breakout.local
 
 ## Workspace Structure
 
 - `apps/`: Application-specific projects
 - `packages/`: Shared libraries and utilities
-
-## Commands
-
-- `pnpm dev`: Run development servers across all workspaces
-- `pnpm build`: Build all projects
-- `pnpm test`: Run all tests
-- `pnpm lint`: Lint all projects
-
-## Contributing
-
-Please read the contributing guidelines before getting started.
 
 ## Feature Roadmap
 
