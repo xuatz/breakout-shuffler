@@ -1,15 +1,17 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { getCookie } from 'hono/cookie';
 import type { Server as HTTPSServer } from 'node:http';
 import { Server as SocketIOServer } from 'socket.io';
 import { Redis } from 'ioredis';
 import { RoomService } from './modules/rooms/room.service';
 import { SocketService } from './modules/sockets/socket.service';
+import { HTTPException } from 'hono/http-exception';
 
 // Create Redis client
 const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
+  host: process.env.REDIS_HOST || 'redis',
   port: parseInt(process.env.REDIS_PORT || '6379'),
 });
 
@@ -22,7 +24,7 @@ const origin = [
   'http://localhost:3000',
   'http://localhost:5173',
   'http://192.168.2.136:5173',
-  'https://client.xuatz.local',
+  'https://client.breakout.local',
 ];
 
 app.use(
@@ -37,8 +39,28 @@ app.use(
 
 // Room management endpoints
 app.post('/rooms', async (c) => {
-  const { roomId, hostId } = await roomService.createRoom();
+  const hostId = getCookie(c, '_bsid');
+  if (!hostId) {
+    throw new HTTPException(403, { message: 'Missing userId' });
+  }
+  const { roomId } = await roomService.createRoom(hostId);
   return c.json({ roomId, hostId });
+});
+
+app.get('/host', async (c) => {
+  const userId = getCookie(c, '_bsid');
+  if (!userId) {
+    throw new HTTPException(403, { message: 'Missing userId' });
+  }
+
+  // 2. Get room owned by hostId; should only have one room
+  const [room] = await roomService.getRoomsByHost(userId);
+  if (!room) {
+    return c.json(undefined);
+  }
+
+  // 3. Return room info
+  return c.json(room);
 });
 
 app.get('/rooms/:id', async (c) => {
