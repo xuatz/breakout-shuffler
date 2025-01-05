@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 interface User {
   id: string;
-  name: string;
   joinedAt: Date;
 }
 
@@ -21,9 +20,11 @@ export class RoomService {
     this.redis = redis;
   }
 
-  async createRoom(
-    hostId: string
-  ): Promise<{ roomId: string; hostId: string }> {
+  async createRoom(hostId: string): Promise<Room> {
+    /**
+     * TODO maybe the host can decide on roomId in future
+     * as long as we include uniq check
+     */
     const roomId = uuidv4();
     const room: Room = {
       id: roomId,
@@ -32,7 +33,6 @@ export class RoomService {
       users: [
         {
           id: hostId,
-          name: this.generateRandomName(),
           joinedAt: new Date(),
         },
       ],
@@ -43,7 +43,7 @@ export class RoomService {
       this.redis.sadd(`host:${hostId}:rooms`, roomId),
     ]);
 
-    return { roomId, hostId };
+    return room;
   }
 
   async getRoomsByHost(hostBsid: string): Promise<Room[]> {
@@ -62,27 +62,36 @@ export class RoomService {
     return room ? JSON.parse(room) : null;
   }
 
-  async joinRoom(
-    roomId: string
-  ): Promise<{ userId: string; userName: string }> {
+  async joinRoom({
+    roomId,
+    userId,
+  }: {
+    roomId: string;
+    userId: string;
+  }): Promise<Room> {
     const room = await this.getRoom(roomId);
     if (!room) {
       throw new Error('Room not found');
     }
 
-    const userId = uuidv4();
-    const userName = this.generateRandomName();
+    // Check if user is already in the room
+    const existingUser = room.users.find((user) => user.id === userId);
+    if (existingUser) {
+      return room;
+    }
 
     room.users.push({
       id: userId,
-      name: userName,
       joinedAt: new Date(),
     });
 
     await this.redis.set(`room:${roomId}`, JSON.stringify(room));
-    return { userId, userName };
+    return room;
   }
 
+  /**
+   * TODO (phase1) do something with this
+   */
   private generateRandomName(): string {
     const adjectives = ['Happy', 'Silly', 'Clever', 'Brave', 'Gentle'];
     const nouns = ['Penguin', 'Lion', 'Tiger', 'Bear', 'Owl'];
