@@ -5,9 +5,8 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useSearchParams,
 } from 'react-router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
@@ -48,13 +47,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const [isConnected, setIsConnected] = useState(socket.connected);
-  const [fooEvents, setFooEvents] = useState([]);
-
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [roomId, setRoomId] = useState(searchParams.get('roomId') ?? '');
-
-  const [cookies, setCookie, removeCookie] = useCookies(['_bsid']);
+  const [cookies, setCookie] = useCookies(['_bsid']);
   useEffect(() => {
     const uniqueId = import.meta.env.PROD
       ? crypto.randomUUID()
@@ -75,11 +68,11 @@ export default function App() {
 
   useEffect(() => {
     function onConnect() {
-      setIsConnected(true);
+      console.log('connected to server!');
     }
 
     function onDisconnect() {
-      setIsConnected(false);
+      console.log('disconnected from server!');
     }
 
     socket.on('connect', onConnect);
@@ -92,14 +85,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (roomId && cookies._bsid) {
-      connectToRoom(roomId, cookies._bsid);
+    if (cookies._bsid) {
+      // TODO i think if the code is properly implemented,
+      // we might not need this (pending delete)
+      sendSocketMessage('registerClient');
     }
-  }, []);
-
-  const connectToRoom = (roomId: string, userId: string) => {
-    sendSocketMessage('joinRoom', { roomId, userId });
-  };
+  }, [cookies._bsid]);
 
   return <Outlet />;
 }
