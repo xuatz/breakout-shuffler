@@ -1,0 +1,63 @@
+## 20250214 - xz - feat: implement room joining and real-time participant tracking
+
+### Room Management
+1. Implemented room joining flow:
+   - HTTP POST to join room
+   - Socket connection with room ID
+   - Real-time participant list updates
+2. Added user identification:
+   - Using _bsid cookie for consistent user tracking
+   - Server extracts user ID from cookie headers
+   - Client shows "(you)" indicator in participant list
+
+### Socket Architecture
+1. Established socket event patterns:
+   - 'joinRoom' - handles room joining with user validation
+   - 'participantsUpdated' - broadcasts participant list changes
+   - 'debugPing' - monitors client connectivity
+2. Client tracking:
+   - Maintains clientMap for socket-user associations
+   - Handles client registration and disconnection
+   - Room-specific event broadcasting
+
+### Technical Decisions
+1. Cookie-based user identification:
+   - Consistent across HTTP and Socket.IO
+   - No need for separate authentication flow
+2. Real-time updates:
+   - Room-specific broadcasts using socket.to(roomId)
+   - Participant list synchronized across all room members
+3. Debug features:
+   - Prefixed with 'debug' for clarity
+   - Room-scoped to avoid cross-room interference
+
+### Todo 1
+
+I need to implement something like `restoreHostRoom` but for the normal participants instead.
+I may also want to consider to rename the function name :thinking:
+
+### Todo 2
+
+I should finish up this last feature to wrap up phase 1
+
+> Assign a random name to each user upon joining, with the option to rename themselves.
+
+## 20250104 - xz
+
+I'm still on phase one. But a lot of the features are pretty much implemented now, just pending some fine tuning.
+
+### Todo 1
+For example, I think while the server should persist some information such as rooms created and who was the owner. it shouldn't contain any information about the users, since this state is entirely dependent on socket.io, so let's use that instead (TODO).
+
+### Todo 2
+I think we can store some basic information about the users
+such as displayName in redis. So that the names can persist 
+across server restart/crash. Some code change is required in
+both client and server, for example:
+1. when user sends `registerClient` message, we should
+  probably take the chance to give the user a randomly
+  generated name.
+    1. to keep things simple, im thinking to append a 3 digit
+      random number to reduce hash collision  
+2. but then we will allow the users to easily rename themselves
+  haven't decide how i will do this tho

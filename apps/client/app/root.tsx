@@ -7,12 +7,9 @@ import {
   ScrollRestoration,
 } from 'react-router';
 import { useEffect } from 'react';
-
+import { useCookies } from 'react-cookie';
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
-
-import { sendSocketMessage, socket } from './lib/socket';
-import { useCookies } from 'react-cookie';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -65,32 +62,6 @@ export default function App() {
       });
     }
   }, []);
-
-  useEffect(() => {
-    function onConnect() {
-      console.log('connected to server!');
-    }
-
-    function onDisconnect() {
-      console.log('disconnected from server!');
-    }
-
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-
-    return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (cookies._bsid) {
-      // TODO i think if the code is properly implemented,
-      // we might not need this (pending delete)
-      sendSocketMessage('registerClient');
-    }
-  }, [cookies._bsid]);
 
   return <Outlet />;
 }

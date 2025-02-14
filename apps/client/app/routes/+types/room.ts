@@ -1,6 +1,6 @@
 export interface User {
   id: string;
-  name: string;
+  displayName: string;
   joinedAt: Date;
 }
 

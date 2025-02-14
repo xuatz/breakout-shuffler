@@ -19,7 +19,7 @@ export class SocketService {
 
       socket.on(
         'joinRoom',
-        async ({ roomId, name }: { roomId: string; name?: string }) => {
+        async ({ roomId }: { roomId: string; name?: string }) => {
           try {
             // Extract userId from cookie
             const cookie = socket.handshake.headers.cookie;
@@ -29,40 +29,21 @@ export class SocketService {
               throw new Error('No user ID found');
             }
 
-            const room = await this.roomService.joinRoom({ roomId, userId });
-
             socket.join(roomId);
+            
+            const participants = await this.roomService.getParticipants(roomId);
+
+            // Emit room joined event to the new participant
             socket.emit('joinedRoom', {
               userId,
-              userName: name || this.generateRandomName(),
-              room,
+              roomId,
+              // room,
+              // participants
             });
-
-            // Notify other users in the room
-            socket.to(roomId).emit('userJoined', {
-              userId,
-              userName: name || this.generateRandomName(),
+            
+            this.io.to(roomId).emit('participantsUpdated', {
+              participants
             });
-
-            const clients = await this.io.in(roomId).fetchSockets();
-            const clientInfo = clients.map((client) => ({
-              id: client.id,
-              userId: this.extractUserId(client.handshake.headers.cookie),
-            }));
-            console.log(
-              `Room ${roomId} has the following clients:`,
-              clientInfo
-            );
-            // Room 4679c3d5-cec5-47d5-aee7-86356583d3b4 has the following clients: [
-            //   {
-            //     id: '3FOQ-7XGYAJhR3cXAAAQ',
-            //     userId: '921541743-4235533644-2401553642-1057335252'
-            //   },
-            //   {
-            //     id: 'bvFH8Y9vYl814nBcAAAT',
-            //     userId: '1242176271-3982710007-682346694-1723789797'
-            //   }
-            // ]
           } catch (error) {
             console.error('Join room error:', error);
             socket.emit('error', {
@@ -97,6 +78,18 @@ export class SocketService {
       socket.on('registerClient', (userId: string) => {
         this.clientMap.set(userId, socket);
         console.log(`Registered client: ${userId}`);
+      });
+
+      socket.on('debugPing', ({ pingerId, roomId }: { pingerId: string; roomId: string }) => {
+        try {
+          console.log(`Debug ping from ${pingerId} in room ${roomId}`);
+          socket.to(roomId).emit('debugPing', { pingerId, roomId });
+        } catch (error) {
+          console.error('Debug ping error:', error);
+          socket.emit('error', {
+            message: error instanceof Error ? error.message : 'Failed to process ping',
+          });
+        }
       });
 
       socket.on('disconnect', () => {

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import type { Route } from '../+types/root';
 import { useParams } from 'react-router';
-import type { Room as RoomType, User } from './+types/room';
+import type { Room as RoomType } from './+types/room';
 import { UserList } from '../components/UserList';
-import { socket, sendSocketMessage } from '../lib/socket';
+import { sendSocketMessage, socket } from '~/lib/socket';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -20,65 +20,52 @@ interface JoinRoomResponse {
 
 export default function Room() {
   const { roomId } = useParams();
-  const [roomData, setRoomData] = useState<RoomType | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [userName, setUserName] = useState('');
   const [hasJoined, setHasJoined] = useState(false);
 
   useEffect(() => {
     const handleJoinedRoom = ({ room }: JoinRoomResponse) => {
-      setLoading(false);
       setHasJoined(true);
-      setRoomData(room);
-    };
-
-    const handleUserJoined = ({
-      userId,
-      userName,
-    }: {
-      userId: string;
-      userName: string;
-    }) => {
-      setRoomData((prev) => {
-        if (!prev) return null;
-        const newUser: User = {
-          id: userId,
-          name: userName,
-          joinedAt: new Date(),
-        };
-        return {
-          ...prev,
-          users: [...prev.users, newUser],
-        };
-      });
     };
 
     const handleError = ({ message }: { message: string }) => {
-      setLoading(false);
       setError(message);
     };
 
     socket.on('joinedRoom', handleJoinedRoom);
-    socket.on('userJoined', handleUserJoined);
     socket.on('error', handleError);
 
     return () => {
       socket.off('joinedRoom', handleJoinedRoom);
-      socket.off('userJoined', handleUserJoined);
       socket.off('error', handleError);
     };
   }, [roomId]);
 
   const handleJoinRoom = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
 
-    sendSocketMessage('joinRoom', {
-      roomId,
-      name: userName.trim() || undefined, // TODO need to implement this in the server later
-    });
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/rooms/${roomId}/join`,
+        {
+          method: 'POST',
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError('Failed to join room');
+      }
+
+      sendSocketMessage('joinRoom', {
+        roomId,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to join room');
+    }
   };
 
   if (!roomId) {
@@ -90,16 +77,6 @@ export default function Room() {
         <p className="text-lg text-gray-700 dark:text-gray-300">
           Please join a room using a valid link.
         </p>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center p-4">
-        <h1 className="text-4xl font-bold mt-8 mb-6 text-gray-900 dark:text-white">
-          Joining Room...
-        </h1>
       </div>
     );
   }
@@ -162,7 +139,7 @@ export default function Room() {
       </h1>
 
       <div className="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-gray-900">
-        <UserList users={roomData?.users || []} />
+        <UserList roomId={roomId} />
       </div>
     </div>
   );

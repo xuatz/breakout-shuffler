@@ -3,14 +3,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 interface User {
   id: string;
-  joinedAt: Date;
+  displayName?: string;
 }
 
 export interface Room {
   id: string;
   hostId: string;
   createdAt: Date;
-  users: User[];
 }
 
 export class RoomService {
@@ -20,7 +19,24 @@ export class RoomService {
     this.redis = redis;
   }
 
+  async getRooms() {
+    const keys = await this.redis.keys('room:*');
+    const rooms = [];
+
+    for (const key of keys) {
+      const roomData = await this.redis.hgetall(key);
+      rooms.push({ id: key.replace('room:', ''), ...roomData });
+    }
+
+    return rooms;
+  }
+
   async createRoom(hostId: string): Promise<Room> {
+    const existingRooms = await this.redis.smembers(`host_rooms:${hostId}`);
+    if (existingRooms.length > 0) {
+      throw new Error(`Host ${hostId} already has a room: ${existingRooms[0]}`);
+    }
+
     /**
      * TODO maybe the host can decide on roomId in future
      * as long as we include uniq check
@@ -30,65 +46,86 @@ export class RoomService {
       id: roomId,
       hostId,
       createdAt: new Date(),
-      users: [
-        {
-          id: hostId,
-          joinedAt: new Date(),
-        },
-      ],
     };
 
     await Promise.all([
-      this.redis.set(`room:${roomId}`, JSON.stringify(room)),
-      this.redis.sadd(`host:${hostId}:rooms`, roomId),
+      this.redis.hset(`room:${roomId}`, room),
+      this.redis.sadd(`participants:${roomId}`, hostId),
+      this.redis.sadd(`host_rooms:${hostId}`, roomId),
     ]);
+
+    const rooms = await this.getRooms();
 
     return room;
   }
 
-  async getRoomsByHost(hostBsid: string): Promise<Room[]> {
-    const roomIds = await this.redis.smembers(`host:${hostBsid}:rooms`);
-    const rooms = await Promise.all(
-      roomIds.map(async (roomId) => {
-        const room = await this.getRoom(roomId);
-        return room;
-      })
-    );
-    return rooms.filter((room): room is Room => room !== null);
+  async getRoomByHost(hostId: string): Promise<Room | undefined> {
+    const roomIds = await this.redis.smembers(`host_rooms:${hostId}`);
+
+    if (roomIds.length === 0) {
+      // Host has no active room
+      return;
+    }
+
+    const roomId = roomIds[0]; // Since host can only have ONE room
+    const roomData = (await this.redis.hgetall(
+      `room:${roomId}`
+    )) as unknown as Room;
+
+    if (!roomData || Object.keys(roomData).length === 0) {
+      return; // Room might have been deleted
+    }
+
+    return {
+      ...roomData,
+      id: roomId,
+    };
   }
 
-  async getRoom(roomId: string): Promise<Room | null> {
-    const room = await this.redis.get(`room:${roomId}`);
-    return room ? JSON.parse(room) : null;
+  async roomExists(roomId: string): Promise<boolean> {
+    const room = await this.getRoom(roomId);
+    return !!room;
   }
 
-  async joinRoom({
-    roomId,
-    userId,
-  }: {
-    roomId: string;
-    userId: string;
-  }): Promise<Room> {
+  async getRoom(roomId: string): Promise<Room | undefined> {
+    const room = (await this.redis.hgetall(
+      `room:${roomId}`
+    )) as unknown as Room;
+
+    return Object.keys(room).length > 0 ? room : undefined;
+  }
+
+  async joinRoom(roomId: string, userId: string): Promise<boolean> {
     const room = await this.getRoom(roomId);
     if (!room) {
       throw new Error('Room not found');
     }
 
-    // Check if user is already in the room
-    const existingUser = room.users.find((user) => user.id === userId);
-    if (existingUser) {
-      return room;
+    // Check if the participant is already in the room
+    const isParticipantInRoom = await this.redis.sismember(
+      `participants:${roomId}`,
+      userId
+    );
+
+    if (isParticipantInRoom === 1) {
+      return true;
     }
 
-    room.users.push({
-      id: userId,
-      joinedAt: new Date(),
-    });
+    await this.redis.sadd(`participants:${roomId}`, userId);
 
-    await this.redis.set(`room:${roomId}`, JSON.stringify(room));
-    return room;
+    return true;
   }
 
+  async getParticipants(roomId: string): Promise<User[]> {
+    const participantIds = await this.redis.smembers(`participants:${roomId}`);
+    return participantIds.map((id) => ({
+      id,
+      displayName: '', // TODO
+    }));
+  }
+
+  // ------------------------------
+  
   /**
    * TODO (phase1) do something with this
    */
