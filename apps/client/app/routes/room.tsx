@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Route } from '../+types/root';
 import { useParams } from 'react-router';
+import { useCookies } from 'react-cookie';
 import type { Room as RoomType } from './+types/room';
 import { UserList } from '../components/UserList';
 import { sendSocketMessage, socket } from '~/lib/socket';
@@ -21,7 +22,8 @@ interface JoinRoomResponse {
 export default function Room() {
   const { roomId } = useParams();
   const [error, setError] = useState('');
-  const [userName, setUserName] = useState('');
+  const [cookies, setCookie] = useCookies(['_displayName']);
+  const [displayName, setDisplayName] = useState(cookies._displayName || '');
   const [hasJoined, setHasJoined] = useState(false);
 
   useEffect(() => {
@@ -60,8 +62,18 @@ export default function Room() {
         setError('Failed to join room');
       }
 
+      if (displayName && displayName !== cookies._displayName) {
+        setCookie('_displayName', displayName, {
+          path: '/',
+          secure: import.meta.env.PROD,
+          domain: import.meta.env.PROD ? 'some-other-domain' : '.breakout.local',
+          maxAge: 7 * 24 * 60 * 60,
+        });
+      }
+
       sendSocketMessage('joinRoom', {
         roomId,
+        displayName,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to join room');
@@ -111,8 +123,8 @@ export default function Room() {
               <input
                 type="text"
                 id="userName"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm 
                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

@@ -1,3 +1,28 @@
+## 20250215 - xz - feat: implement user display names
+
+### Display Name Management
+1. Client-side implementation:
+   - Generate random names with adjective + noun + number pattern
+   - Store displayName in cookie alongside _bsid
+   - Allow users to modify name when joining room
+   - Persist name changes to cookie
+
+### Data Storage
+1. Redis implementation:
+   - Store user display names in `user:{userId}` hash
+   - Display names persist across server restarts
+   - Names are room-independent (consistent across rooms)
+
+### Technical Decisions
+1. Cookie-based storage:
+   - Display names stored in _displayName cookie
+   - Generated on first visit
+   - Updated when user changes name
+2. Name synchronization:
+   - Display name included in joinRoom event
+   - Participants list includes display names
+   - Real-time updates via participantsUpdated event
+
 ## 20250214 - xz - feat: implement room joining and real-time participant tracking
 
 ### Room Management

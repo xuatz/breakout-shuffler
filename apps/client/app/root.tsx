@@ -9,6 +9,7 @@ import {
 import { useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 import type { Route } from './+types/root';
+import { generateRandomName } from './lib/generateRandomName';
 import stylesheet from './app.css?url';
 
 export const links: Route.LinksFunction = () => [
@@ -44,7 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const [cookies, setCookie] = useCookies(['_bsid']);
+  const [cookies, setCookie] = useCookies(['_bsid', '_displayName']);
   useEffect(() => {
     const uniqueId = import.meta.env.PROD
       ? crypto.randomUUID()
@@ -53,13 +54,20 @@ export default function App() {
           window.crypto.getRandomValues(array);
           return array.join('-');
         })();
+    const cookieOptions = {
+      path: '/',
+      secure: import.meta.env.PROD,
+      domain: import.meta.env.PROD ? 'some-other-domain' : '.breakout.local',
+      maxAge: 7 * 24 * 60 * 60,
+    };
+
     if (!cookies._bsid) {
-      setCookie('_bsid', uniqueId, {
-        path: '/',
-        secure: import.meta.env.PROD,
-        domain: import.meta.env.PROD ? 'some-other-domain' : '.breakout.local',
-        maxAge: 7 * 24 * 60 * 60,
-      });
+      setCookie('_bsid', uniqueId, cookieOptions);
+    }
+    
+    if (!cookies._displayName) {
+      const randomName = generateRandomName();
+      setCookie('_displayName', randomName, cookieOptions);
     }
   }, []);
 

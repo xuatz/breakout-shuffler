@@ -1,4 +1,4 @@
-# Breakout Shuffler - Progress Report
+# Breakout Shuffler - Summary Report
 
 ## Application Overview
 
@@ -75,9 +75,9 @@ A real-time application that enables hosts to create rooms and participants to j
 - Socket context with guaranteed availability
 - Basic UI components for room interaction
 - Connection status monitoring via debug ping
+- User display names with persistence and customization
 
 ### In Progress
-- Display name implementation
 - Participant disconnection handling
 - Room cleanup on host disconnect
 
@@ -101,6 +101,9 @@ participants:{roomId} (set)
 
 host_rooms:{hostId} (set)
   - Set of room IDs (limited to one per host)
+
+user:{userId} (hash)
+  - displayName: string
 ```
 
 ### Socket Events
@@ -111,7 +114,7 @@ host_rooms:{hostId} (set)
 'error': { message: string }
 
 // Client -> Server
-'joinRoom': { roomId: string, name?: string }
+'joinRoom': { roomId: string, displayName: string }
 'createRoom': void
 'debugPing': { pingerId: string, roomId: string }
 ```
@@ -120,6 +123,5 @@ host_rooms:{hostId} (set)
 
 1. Implement proper error handling for edge cases
 2. Add participant disconnection cleanup
-3. Implement display name functionality
-4. Add room deletion when host disconnects
-5. Enhance UI/UX for room management
+3. Add room deletion when host disconnects
+4. Enhance UI/UX for room management

@@ -19,7 +19,7 @@ export class SocketService {
 
       socket.on(
         'joinRoom',
-        async ({ roomId }: { roomId: string; name?: string }) => {
+        async ({ roomId, displayName }: { roomId: string; displayName: string }) => {
           try {
             // Extract userId from cookie
             const cookie = socket.handshake.headers.cookie;
@@ -29,18 +29,16 @@ export class SocketService {
               throw new Error('No user ID found');
             }
 
+            await this.roomService.joinRoom(roomId, userId, displayName);
             socket.join(roomId);
-            
-            const participants = await this.roomService.getParticipants(roomId);
 
             // Emit room joined event to the new participant
             socket.emit('joinedRoom', {
               userId,
               roomId,
-              // room,
-              // participants
             });
             
+            const participants = await this.roomService.getParticipants(roomId);
             this.io.to(roomId).emit('participantsUpdated', {
               participants
             });
@@ -116,17 +114,5 @@ export class SocketService {
     }, {} as { [key: string]: string });
 
     return cookies['_bsid'];
-  }
-
-  /**
-   * TODO (phase1) do something with this
-   */
-  private generateRandomName(): string {
-    const adjectives = ['Happy', 'Silly', 'Clever', 'Brave', 'Gentle'];
-    const nouns = ['Penguin', 'Lion', 'Tiger', 'Bear', 'Owl'];
-    const randomAdjective =
-      adjectives[Math.floor(Math.random() * adjectives.length)];
-    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-    return `${randomAdjective} ${randomNoun}`;
   }
 }

@@ -95,37 +95,43 @@ export class RoomService {
     return Object.keys(room).length > 0 ? room : undefined;
   }
 
-  async joinRoom(roomId: string, userId: string): Promise<boolean> {
+  async joinRoom(
+    roomId: string,
+    userId: string,
+    displayName: string
+  ): Promise<boolean> {
     const room = await this.getRoom(roomId);
     if (!room) {
       throw new Error('Room not found');
     }
 
-    // Check if the participant is already in the room
-    const isParticipantInRoom = await this.redis.sismember(
-      `participants:${roomId}`,
-      userId
-    );
-
-    if (isParticipantInRoom === 1) {
-      return true;
-    }
-
-    await this.redis.sadd(`participants:${roomId}`, userId);
+    await Promise.all([
+      this.redis.sadd(`participants:${roomId}`, userId),
+      this.redis.hset(`user:${userId}`, {
+        displayName,
+      }),
+    ]);
 
     return true;
   }
 
   async getParticipants(roomId: string): Promise<User[]> {
     const participantIds = await this.redis.smembers(`participants:${roomId}`);
-    return participantIds.map((id) => ({
-      id,
-      displayName: '', // TODO
-    }));
+    
+    const participants = await Promise.all(
+      participantIds.map(async (id) => {
+        const userData = await this.redis.hgetall(`user:${id}`);
+        return {
+          id,
+          displayName: userData.displayName,
+        };
+      })
+    );
+    return participants;
   }
 
   // ------------------------------
-  
+
   /**
    * TODO (phase1) do something with this
    */
