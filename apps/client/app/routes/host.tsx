@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Route } from './+types/host';
 import { QRCodeSVG } from 'qrcode.react';
 import { useCookies } from 'react-cookie';
-import type { Room } from './+types/room';
+import type { Room } from '../types';
 import { UserList } from '../components/UserList';
 import { sendSocketMessage, socket } from '~/lib/socket';
 

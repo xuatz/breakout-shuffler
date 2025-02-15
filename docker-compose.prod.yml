@@ -12,17 +12,17 @@ services:
       - client
       - server
   client:
-    build:
-      dockerfile: ./apps/client/Dockerfile
+    image: ghcr.io/xuatz/breakout-shuffler/client:latest
     environment:
       - VITE_API_URL=https://server.breakout.local
     expose:
       - "3000"
   server:
-    build:
-      dockerfile: ./apps/server/Dockerfile
+    image: ghcr.io/xuatz/breakout-shuffler/server:latest
     expose:
       - "9000"
+  redis:
+    image: redis:latest
 
 volumes:
   caddy_data:

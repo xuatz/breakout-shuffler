@@ -14,6 +14,8 @@ const origin = [
   'http://localhost:5173',
   'http://192.168.2.136:5173',
   'https://client.breakout.local',
+  'https://breakout-shuffler.xuatz.com',
+  'https://breakout-shuffler.pages.dev',
 ];
 
 // Create Redis client

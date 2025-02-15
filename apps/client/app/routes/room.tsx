@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Route } from '../+types/root';
 import { useParams } from 'react-router';
 import { useCookies } from 'react-cookie';
-import type { Room as RoomType } from './+types/room';
+import type { Room as RoomType } from '../types';
 import { UserList } from '../components/UserList';
 import { sendSocketMessage, socket } from '~/lib/socket';
 

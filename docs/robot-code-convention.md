@@ -15,3 +15,11 @@
 - Extract frequently used values into variables before the return statement
 - When using hooks that return multiple values, destructure only the needed values (e.g., `const [cookies] = useCookies()` if setCookie is not needed)
 - Use consistent naming for user identifiers (e.g., userId for the current user's ID)
+
+## Docker
+
+### Dockerfile Formatting
+- Align multiple COPY commands for better readability when copying to the same destination directory
+  ```dockerfile
+  COPY --from=build-env /app/apps/client/build            /usr/share/nginx/html
+  COPY --from=build-env /app/apps/client/build/index.html /usr/share/nginx/html/index.html

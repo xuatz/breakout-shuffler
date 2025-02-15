@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { User } from '../routes/+types/room';
+import type { User } from '../types';
 import { sendSocketMessage, socket } from '~/lib/socket';
 import { useCookies } from 'react-cookie';
 

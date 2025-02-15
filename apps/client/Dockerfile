@@ -1,4 +1,4 @@
-FROM node:20 AS dependencies-env
+FROM node:22-bullseye AS dependencies-env
 RUN npm i -g pnpm
 COPY ./apps/client /app/apps/client
 
@@ -25,6 +25,22 @@ COPY --from=development-dependencies-env /app/node_modules /app/node_modules
 COPY --from=development-dependencies-env /app/apps/client/node_modules /app/apps/client/node_modules
 WORKDIR /app
 RUN pnpm -F client run build
+
+# FROM nginx:alpine
+# COPY --from=build-env /app/apps/client/build/client            /usr/share/nginx/html
+
+# # Configure nginx to handle SPA routing
+# RUN echo 'server { \
+#     listen 3000; \
+#     location / { \
+#         root /usr/share/nginx/html; \
+#         index index.html; \
+#         try_files $uri $uri/ /index.html; \
+#     } \
+# }' > /etc/nginx/conf.d/default.conf
+
+# EXPOSE 3000
+# CMD ["nginx", "-g", "daemon off;"]
 
 FROM dependencies-env
 COPY ./package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc /app/

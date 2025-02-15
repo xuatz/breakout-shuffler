@@ -125,6 +125,23 @@ user:{userId} (hash)
 'updateDisplayName': { displayName: string }
 ```
 
+## CI/CD Pipeline
+
+### Docker Configuration
+- Multi-stage builds for optimized image sizes
+- Production-ready configurations:
+  - Client: React application served via static files
+  - Server: Compiled TypeScript with Node.js runtime (port 9000)
+  - Only production dependencies included in final images
+  - Uses pnpm@10 for package management
+
+### GitHub Actions Workflow
+- Automated Docker image builds on push to main branch
+- Builds and pushes both client and server images to GitHub Container Registry (ghcr.io)
+- Uses efficient caching and multi-platform build support
+- Images tagged with commit SHA and latest tags
+- Images published under repository namespace (e.g., owner/repo/client, owner/repo/server)
+
 ## Next Steps
 
 1. Implement proper error handling for edge cases

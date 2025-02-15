@@ -59,7 +59,7 @@ export default function App() {
     const cookieOptions = {
       path: '/',
       secure: import.meta.env.PROD,
-      domain: import.meta.env.PROD ? 'some-other-domain' : '.breakout.local',
+      domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
       maxAge: 7 * 24 * 60 * 60,
     };
 
