@@ -130,17 +130,19 @@ export class RoomService {
     return participants;
   }
 
-  // ------------------------------
-
-  /**
-   * TODO (phase1) do something with this
-   */
-  private generateRandomName(): string {
-    const adjectives = ['Happy', 'Silly', 'Clever', 'Brave', 'Gentle'];
-    const nouns = ['Penguin', 'Lion', 'Tiger', 'Bear', 'Owl'];
-    const randomAdjective =
-      adjectives[Math.floor(Math.random() * adjectives.length)];
-    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-    return `${randomAdjective} ${randomNoun}`;
+  async getRoomByParticipant(userId: string): Promise<Room | undefined> {
+    const roomKeys = await this.redis.keys('participants:*');
+    
+    // Find the room that has this participant
+    for (const key of roomKeys) {
+      const roomId = key.replace('participants:', '');
+      const isMember = await this.redis.sismember(key, userId);
+      
+      if (isMember) {
+        return this.getRoom(roomId);
+      }
+    }
+    
+    return undefined;
   }
 }

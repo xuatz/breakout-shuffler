@@ -47,7 +47,7 @@ const io = new SocketIOServer(server as HTTPSServer, {
 });
 
 // Initialize socket service
-const socketService = new SocketService(io, roomService);
+const socketService = new SocketService(io, redis, roomService);
 
 app.use(
   '*',
@@ -116,7 +116,12 @@ app.post('/rooms/:id/join', async (c) => {
     throw new HTTPException(404, { message: `Room ${roomId} does not exist.` });
   }
 
-  const success = await roomService.joinRoom(roomId, userId);
+  const displayName = getCookie(c, '_displayName');
+  if (!displayName) {
+    throw new HTTPException(403, { message: 'Missing displayName' });
+  }
+
+  const success = await roomService.joinRoom(roomId, userId, displayName);
 
   if (success) {
     return c.json({ success: true });

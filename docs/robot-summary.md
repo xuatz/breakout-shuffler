@@ -43,7 +43,12 @@ A real-time application that enables hosts to create rooms and participants to j
 3. **UserList Component (`apps/client/app/components/UserList.tsx`)**
    - Displays room participants
    - Updates in real-time via socket events
-   - Handles participant display names (prepared for future implementation)
+   - Shows current user with "(you)" indicator
+
+4. **TopBar Component (`apps/client/app/components/TopBar.tsx`)**
+   - Sticky top bar with user icon
+   - Shows first letter of user's display name
+   - Provides display name change functionality
 
 ## Implementation Details
 
@@ -117,6 +122,7 @@ user:{userId} (hash)
 'joinRoom': { roomId: string, displayName: string }
 'createRoom': void
 'debugPing': { pingerId: string, roomId: string }
+'updateDisplayName': { displayName: string }
 ```
 
 ## Next Steps

@@ -1,3 +1,23 @@
+## 20250215 part 2 - xz - feat: add top bar with display name management
+
+### UI Implementation
+1. Added sticky top bar:
+   - User icon showing first letter of display name
+   - Click to open name change dialog
+   - Dark mode support with consistent styling
+
+### Display Name Updates
+1. Client-side changes:
+   - Added name change dialog with modal overlay
+   - Real-time updates to all participants
+   - Persists changes to cookie
+
+2. Server-side changes:
+   - Added updateDisplayName socket event
+   - Updates Redis user:{userId} hash
+   - Broadcasts changes to room participants
+   - Added getRoomByParticipant for room lookup
+
 ## 20250215 - xz - feat: implement user display names
 
 ### Display Name Management

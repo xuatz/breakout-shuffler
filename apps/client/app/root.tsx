@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 import type { Route } from './+types/root';
 import { generateRandomName } from './lib/generateRandomName';
+import { TopBar } from './components/TopBar';
 import stylesheet from './app.css?url';
 
 export const links: Route.LinksFunction = () => [
@@ -36,6 +37,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
+        <TopBar />
         {children}
         <ScrollRestoration />
         <Scripts />
