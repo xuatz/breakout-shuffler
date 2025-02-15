@@ -12,6 +12,7 @@ import type { Route } from './+types/root';
 import { generateRandomName } from './lib/generateRandomName';
 import { TopBar } from './components/TopBar';
 import stylesheet from './app.css?url';
+import { socket } from './lib/socket';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -71,6 +72,11 @@ export default function App() {
       const randomName = generateRandomName();
       setCookie('_displayName', randomName, cookieOptions);
     }
+
+    /**
+     * make sure cookie values are set before connecting to the socket
+     */
+    socket.connect();
   }, []);
 
   return <Outlet />;

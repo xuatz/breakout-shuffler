@@ -7,6 +7,7 @@ export const socket = io(socketUrl, {
   reconnection: true,
   reconnectionAttempts: 5,
   reconnectionDelay: 1000,
+  autoConnect: false
 });
 
 export const sendSocketMessage = (event: string, data?: any) => {
