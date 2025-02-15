@@ -1,16 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { sendSocketMessage } from '~/lib/socket';
 
 export function TopBar() {
+  const [cookies, setCookie] = useCookies(['_displayName']);
+  const [userInitial, setUserInitial] = useState('?');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newDisplayName, setNewDisplayName] = useState('');
-  const [cookies, setCookie] = useCookies(['_displayName']);
+
+  useEffect(() => {
+    if (cookies._displayName) {
+      setUserInitial(cookies._displayName.charAt(0).toUpperCase());
+    }
+  }, [cookies._displayName]);
 
   const handleUpdateName = () => {
     if (!newDisplayName.trim()) return;
 
-    // Update cookie
     setCookie('_displayName', newDisplayName, {
       path: '/',
       secure: import.meta.env.PROD,
@@ -20,7 +26,7 @@ export function TopBar() {
 
     // Notify other clients
     sendSocketMessage('updateDisplayName', {
-        displayName: newDisplayName,
+      displayName: newDisplayName,
     });
 
     setIsDialogOpen(false);
@@ -37,7 +43,7 @@ export function TopBar() {
           className="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white flex items-center justify-center transition-colors"
           title="Change display name"
         >
-          {cookies._displayName?.charAt(0)?.toUpperCase() || '?'}
+          {userInitial}
         </button>
       </div>
 

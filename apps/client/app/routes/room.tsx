@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import type { Route } from '../+types/root';
 import { useParams } from 'react-router';
 import { useCookies } from 'react-cookie';
-import type { Room as RoomType } from '../types';
 import { UserList } from '../components/UserList';
 import { sendSocketMessage, socket } from '~/lib/socket';
 
@@ -13,21 +12,21 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-interface JoinRoomResponse {
-  userId: string;
-  userName: string;
-  room: RoomType;
-}
-
 export default function Room() {
   const { roomId } = useParams();
   const [error, setError] = useState('');
   const [cookies, setCookie] = useCookies(['_displayName']);
-  const [displayName, setDisplayName] = useState(cookies._displayName || '');
+  const [displayName, setDisplayName] = useState('');
   const [hasJoined, setHasJoined] = useState(false);
 
   useEffect(() => {
-    const handleJoinedRoom = ({ room }: JoinRoomResponse) => {
+    if (!displayName && cookies._displayName) {
+      setDisplayName(cookies._displayName);
+    }
+  }, [cookies._displayName])
+
+  useEffect(() => {
+    const handleJoinedRoom = () => {
       setHasJoined(true);
     };
 
