@@ -1,18 +1,46 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { sendSocketMessage } from '~/lib/socket';
 
+interface MenuOption {
+  label: string;
+  onClick: () => void;
+  isDanger?: boolean;
+}
+
 export function TopBar() {
-  const [cookies, setCookie] = useCookies(['_displayName']);
+  const [cookies, setCookie, removeCookie] = useCookies([
+    '_bsid',
+    '_displayName',
+  ]);
   const [userInitial, setUserInitial] = useState('?');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [newDisplayName, setNewDisplayName] = useState('');
+  const menuRef = useRef<HTMLDivElement>(null);
+  const userIconRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (cookies._displayName) {
       setUserInitial(cookies._displayName.charAt(0).toUpperCase());
     }
   }, [cookies._displayName]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userIconRef.current && userIconRef.current.contains(event.target as Node)) {
+        return;
+      }
+
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+        return;
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleUpdateName = () => {
     if (!newDisplayName.trim()) return;
@@ -32,22 +60,84 @@ export function TopBar() {
     setIsDialogOpen(false);
   };
 
+  const handleClearCookies = () => {
+    removeCookie('_bsid', {
+      path: '/',
+      secure: import.meta.env.PROD,
+      domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
+    });
+    removeCookie('_displayName', {
+      path: '/',
+      secure: import.meta.env.PROD,
+      domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
+    });
+    setIsMenuOpen(false);
+  };
+
+  const menuOptions: MenuOption[] = [
+    {
+      label: 'Change Display Name',
+      onClick: () => {
+        setNewDisplayName(cookies._displayName);
+        setIsDialogOpen(true);
+        setIsMenuOpen(false);
+      },
+    },
+    {
+      label: '⚙️ Debug',
+      onClick: () => {}, // This is just a section header
+    },
+    {
+      label: 'Clear Cookies',
+      onClick: handleClearCookies,
+      isDanger: true,
+    },
+  ];
+
   return (
     <div className="sticky top-0 z-50 w-full bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
-      <div className="flex justify-end">
+      <div className="flex justify-end relative">
         <button
-          onClick={() => {
-            setNewDisplayName(cookies._displayName);
-            setIsDialogOpen(true);
-          }}
+          ref={userIconRef}
+          onClick={() => setIsMenuOpen((prev) => !prev)}
           className="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white flex items-center justify-center transition-colors"
-          title="Change display name"
+          title="Open menu"
         >
           {userInitial}
         </button>
+
+        {isMenuOpen && (
+          <div
+            ref={menuRef}
+            className="absolute right-0 top-10 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
+          >
+            {menuOptions.map((option, index) =>
+              option.onClick === undefined ? (
+                <div
+                  key={index}
+                  className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 font-semibold bg-gray-50 dark:bg-gray-700"
+                >
+                  {option.label}
+                </div>
+              ) : (
+                <button
+                  key={index}
+                  onClick={option.onClick}
+                  className={`w-full text-left px-4 py-2 text-sm
+                    ${
+                      option.isDanger
+                        ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                >
+                  {option.label}
+                </button>
+              )
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Dialog */}
       {isDialogOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">

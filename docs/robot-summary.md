@@ -36,19 +36,32 @@ A real-time application that enables hosts to create rooms and participants to j
    - Ensures socket is always available (non-null)
    - Handles connection lifecycle
 
-2. **Room Component (`apps/client/app/routes/room.tsx`)**
+2. **Cookie Management**
+   - Uses react-cookie for cookie management
+   - Key cookies:
+     - `_bsid`: Breakout Shuffler ID cookie
+     - `_displayName`: User's display name
+   - Cookie configuration:
+     - Domain: Uses VITE_COOKIE_DOMAIN env var with fallback to '.breakout.local'
+     - Secure: Enabled in production
+     - Path: '/'
+
+3. **Room Component (`apps/client/app/routes/room.tsx`)**
    - Handles room joining flow
    - Manages room state and participant interactions
 
-3. **UserList Component (`apps/client/app/components/UserList.tsx`)**
+4. **UserList Component (`apps/client/app/components/UserList.tsx`)**
    - Displays room participants
    - Updates in real-time via socket events
    - Shows current user with "(you)" indicator
 
-4. **TopBar Component (`apps/client/app/components/TopBar.tsx`)**
-   - Sticky top bar with user icon
+5. **TopBar Component (`apps/client/app/components/TopBar.tsx`)**
+   - Sticky top bar with user icon and dropdown menu
    - Shows first letter of user's display name
-   - Provides display name change functionality
+   - Features:
+     - Display name change functionality
+     - Debug menu with cookie management
+     - Click-outside handling for menu dismissal
 
 ## Implementation Details
 
