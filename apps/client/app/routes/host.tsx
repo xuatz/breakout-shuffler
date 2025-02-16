@@ -38,6 +38,7 @@ export default function Host() {
                 roomId: room.id,
                 displayName: cookies._displayName,
               });
+              sendSocketMessage('getNudges');
             }
           }
         } catch (error) {
@@ -125,7 +126,7 @@ export default function Host() {
                 {joinUrl}
               </span>
 
-              <UserList roomId={roomId} title="Room Users" />
+              <UserList isHost roomId={roomId} title="Room Users" />
             </div>
           </div>
         </div>

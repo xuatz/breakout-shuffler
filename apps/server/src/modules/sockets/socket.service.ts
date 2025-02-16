@@ -2,6 +2,13 @@ import { Redis } from 'ioredis';
 import { Server, Socket } from 'socket.io';
 import { RoomService } from '../rooms/room.service';
 
+interface NudgeData {
+  userId: string;
+  displayName: string;
+  count: number;
+  lastNudge: Date;
+}
+
 export class SocketService {
   private io: Server;
   private redis: Redis;
@@ -122,6 +129,129 @@ export class SocketService {
           console.error('Debug ping error:', error);
           socket.emit('error', {
             message: error instanceof Error ? error.message : 'Failed to process ping',
+          });
+        }
+      });
+
+      socket.on('nudgeHost', async () => {
+        try {
+          const cookie = socket.handshake.headers.cookie;
+          const userId = this.extractUserId(cookie);
+
+          if (!userId) {
+            throw new Error('No user ID found');
+          }
+
+          // Get the room the user is in
+          const room = await this.roomService.getRoomByParticipant(userId);
+          if (!room) {
+            throw new Error('User is not in a room');
+          }
+
+          // Get user's display name
+          const userInfo = await this.redis.hgetall(`user:${userId}`);
+          if (!userInfo.displayName) {
+            throw new Error('User display name not found');
+          }
+
+          // Update nudge count in Redis
+          const nudgeKey = `host_nudges:${room.id}`;
+          const nudgeData = await this.redis.hget(nudgeKey, userId);
+          let currentData: NudgeData;
+          
+          if (nudgeData) {
+            currentData = JSON.parse(nudgeData);
+            currentData.count += 1;
+            currentData.lastNudge = new Date();
+          } else {
+            currentData = {
+              userId,
+              displayName: userInfo.displayName,
+              count: 1,
+              lastNudge: new Date()
+            };
+          }
+
+          await this.redis.hset(nudgeKey, userId, JSON.stringify(currentData));
+
+          // Get all nudges for the room
+          const allNudges = await this.redis.hgetall(nudgeKey);
+          const nudgeList = Object.values(allNudges).map(data => JSON.parse(data));
+
+          // Emit to host
+          this.io.to(room.id).emit('hostNudged', {
+            nudges: nudgeList
+          });
+        } catch (error) {
+          console.error('Nudge host error:', error);
+          socket.emit('error', {
+            message: error instanceof Error ? error.message : 'Failed to nudge host',
+          });
+        }
+      });
+
+      socket.on('clearNudges', async () => {
+        try {
+          const cookie = socket.handshake.headers.cookie;
+          const userId = this.extractUserId(cookie);
+
+          if (!userId) {
+            throw new Error('No user ID found');
+          }
+
+          // Get the room the user is in
+          const room = await this.roomService.getRoomByParticipant(userId);
+          if (!room) {
+            throw new Error('User is not in a room');
+          }
+
+          // Verify user is the host
+          if (room.hostId !== userId) {
+            throw new Error('Only the host can clear nudges');
+          }
+
+          // Clear nudges for the room
+          await this.redis.del(`host_nudges:${room.id}`);
+
+          // Notify clients that nudges were cleared
+          this.io.to(room.id).emit('hostNudged', {
+            nudges: []
+          });
+        } catch (error) {
+          console.error('Clear nudges error:', error);
+          socket.emit('error', {
+            message: error instanceof Error ? error.message : 'Failed to clear nudges',
+          });
+        }
+      });
+
+      socket.on('getNudges', async () => {
+        try {
+          const cookie = socket.handshake.headers.cookie;
+          const userId = this.extractUserId(cookie);
+
+          if (!userId) {
+            throw new Error('No user ID found');
+          }
+
+          // Get the room the user is in
+          const room = await this.roomService.getRoomByParticipant(userId);
+          if (!room) {
+            throw new Error('User is not in a room');
+          }
+
+          // Get all nudges for the room
+          const nudgeKey = `host_nudges:${room.id}`;
+          const allNudges = await this.redis.hgetall(nudgeKey);
+          const nudgeList = Object.values(allNudges).map(data => JSON.parse(data));
+
+          socket.emit('hostNudged', {
+            nudges: nudgeList
+          });
+        } catch (error) {
+          console.error('Get nudges error:', error);
+          socket.emit('error', {
+            message: error instanceof Error ? error.message : 'Failed to get nudges',
           });
         }
       });

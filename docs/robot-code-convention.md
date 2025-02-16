@@ -15,6 +15,36 @@
 - Extract frequently used values into variables before the return statement
 - When using hooks that return multiple values, destructure only the needed values (e.g., `const [cookies] = useCookies()` if setCookie is not needed)
 - Use consistent naming for user identifiers (e.g., userId for the current user's ID)
+- Layout patterns:
+  - Use flex with gap utilities (e.g., gap-x-2) for consistent spacing between elements
+  - Prefer gap over margin/padding for element spacing when possible
+
+### Modal Components
+- Use a base Modal component for consistent styling and behavior
+- Implement click-outside behavior at the base Modal level
+- Pass title as a prop when the modal needs a header
+- Include close button in header when applicable
+
+### State Management
+- Use Jotai for global state management
+- Prefer atoms with listeners for state that needs side effects
+- Keep atom definitions in dedicated files under atoms/
+- Group related atoms in the same file (e.g., nudgeWithListener.ts)
+
+### Socket Messages
+- Keep socket message payloads minimal:
+  - Omit empty objects when no data needs to be sent
+  - Only include necessary data in the payload
+- Group related socket events in the server implementation
+- Include proper error handling for each socket event
+- Persist relevant socket event data in Redis when needed
+
+### Redis Data Structure
+- Use consistent key naming patterns:
+  - Entity-specific data: `entity:{id}` (e.g., `room:{roomId}`)
+  - Relationship data: `relationship:{parentId}` (e.g., `host_nudges:{roomId}`)
+- Store complex data as JSON strings in Redis hashes
+- Include timestamps for time-sensitive data
 
 ## Docker
 

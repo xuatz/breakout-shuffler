@@ -1,3 +1,38 @@
+# Development Journal
+
+## 20250216 - xz - feat(robot): host nudging
+
+### Overview
+Implemented a feature allowing participants to nudge the host, with visual feedback and persistent tracking.
+
+### Key Implementations
+
+1. Server-side Changes:
+   - Added Redis hash `host_nudges:{roomId}` to store nudge data
+   - Implemented socket events:
+     - `nudgeHost`: Updates nudge count and broadcasts to room
+     - `clearNudges`: Allows host to clear nudge history
+     - `getNudges`: Retrieves current nudge state
+
+2. Client-side Changes:
+   - Added Jotai state management with atomWithListeners
+   - Created Modal components:
+     - Base Modal with click-outside behavior
+     - NudgeModal for displaying nudge history
+   - Enhanced TopBar:
+     - Added shake animation for nudge notifications
+     - Added nudge count in menu
+     - Integrated modal for viewing nudge history
+
+3. UI/UX Improvements:
+   - Visual feedback through shake animation
+   - Organized nudge history by most recent
+   - Clear all functionality for hosts
+   - Persistent nudge tracking between sessions
+
+### Next Steps
+- Consider adding notification sounds (optional)
+
 ## 20250215 part 2 - xz - feat: add top bar with display name management
 
 ### UI Implementation
@@ -106,3 +141,4 @@ both client and server, for example:
       random number to reduce hash collision  
 2. but then we will allow the users to easily rename themselves
   haven't decide how i will do this tho
+

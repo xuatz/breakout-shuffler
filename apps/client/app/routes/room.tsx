@@ -23,7 +23,7 @@ export default function Room() {
     if (!displayName && cookies._displayName) {
       setDisplayName(cookies._displayName);
     }
-  }, [cookies._displayName])
+  }, [cookies._displayName]);
 
   useEffect(() => {
     const handleJoinedRoom = () => {
@@ -65,7 +65,9 @@ export default function Room() {
         setCookie('_displayName', displayName, {
           path: '/',
           secure: import.meta.env.PROD,
-          domain: import.meta.env.PROD ? 'some-other-domain' : '.breakout.local',
+          domain: import.meta.env.PROD
+            ? 'some-other-domain'
+            : '.breakout.local',
           maxAge: 7 * 24 * 60 * 60,
         });
       }

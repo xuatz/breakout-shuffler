@@ -47,7 +47,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center p-4">
-      <h1 className="text-4xl font-bold mt-8 mb-6 text-gray-900 dark:text-white">Join Room</h1>
+      <h1 className="text-4xl font-bold mt-8 mb-6 text-gray-900 dark:text-white">
+        Join Room
+      </h1>
 
       <div className="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-gray-900">
         {error && (
@@ -57,7 +59,9 @@ export default function Home() {
         )}
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-white">Room ID</label>
+          <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-white">
+            Room ID
+          </label>
           <input
             type="text"
             value={roomId}

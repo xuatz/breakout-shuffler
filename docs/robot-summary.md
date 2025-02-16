@@ -54,6 +54,9 @@ A real-time application that enables hosts to create rooms and participants to j
    - Displays room participants
    - Updates in real-time via socket events
    - Shows current user with "(you)" indicator
+   - Debug features:
+     - Ping: Test connection with other participants
+     - Nudge Host: Allow participants to notify host (non-host only)
 
 5. **TopBar Component (`apps/client/app/components/TopBar.tsx`)**
    - Sticky top bar with user icon and dropdown menu
@@ -62,6 +65,11 @@ A real-time application that enables hosts to create rooms and participants to j
      - Display name change functionality
      - Debug menu with cookie management
      - Click-outside handling for menu dismissal
+     - Nudge notifications for hosts:
+       - Icon shakes when receiving nudges
+       - Nudge count in dropdown menu
+       - Modal view of nudge history
+       - Clear all nudges functionality
 
 ## Implementation Details
 
@@ -94,6 +102,9 @@ A real-time application that enables hosts to create rooms and participants to j
 - Basic UI components for room interaction
 - Connection status monitoring via debug ping
 - User display names with persistence and customization
+- Host notification system with visual feedback
+- Persistent nudge tracking with Redis
+- Real-time nudge updates with animation
 
 ### In Progress
 - Participant disconnection handling
@@ -122,6 +133,14 @@ host_rooms:{hostId} (set)
 
 user:{userId} (hash)
   - displayName: string
+
+host_nudges:{roomId} (hash)
+  - userId -> {
+      userId: string,
+      displayName: string,
+      count: number,
+      lastNudge: Date
+    }
 ```
 
 ### Socket Events
@@ -130,12 +149,16 @@ user:{userId} (hash)
 'joinedRoom': { userId: string, roomId: string }
 'participantsUpdated': { participants: User[] }
 'error': { message: string }
+'hostNudged': { nudges: NudgeData[] }
 
 // Client -> Server
 'joinRoom': { roomId: string, displayName: string }
 'createRoom': void
 'debugPing': { pingerId: string, roomId: string }
 'updateDisplayName': { displayName: string }
+'nudgeHost': void
+'clearNudges': void
+'getNudges': void
 ```
 
 ## CI/CD Pipeline
