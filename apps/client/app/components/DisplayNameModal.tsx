@@ -6,16 +6,14 @@ import { Modal } from './Modal';
 interface DisplayNameModalProps {
   isOpen: boolean;
   onClose: () => void;
-  currentName: string;
 }
 
 export function DisplayNameModal({
   isOpen,
   onClose,
-  currentName,
 }: DisplayNameModalProps) {
-  const [newDisplayName, setNewDisplayName] = useState(currentName);
-  const [, setCookie] = useCookies(['_displayName']);
+  const [getCookie, setCookie] = useCookies(['_displayName']);
+  const [newDisplayName, setNewDisplayName] = useState(getCookie._displayName);
 
   const handleUpdateName = () => {
     if (!newDisplayName.trim()) return;

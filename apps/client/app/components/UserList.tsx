@@ -53,7 +53,7 @@ export function UserList({
       socket.off('participantsUpdated', handleParticipantsUpdated);
       socket.off('hostNudged', handleHostNudged);
     };
-  }, [roomId, users]);
+  }, [roomId]);
 
   return (
     <div className="w-full bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4 relative">

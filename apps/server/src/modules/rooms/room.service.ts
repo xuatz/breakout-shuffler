@@ -107,6 +107,7 @@ export class RoomService {
 
     await Promise.all([
       this.redis.sadd(`participants:${roomId}`, userId),
+      this.redis.sadd(`user_rooms:${userId}`, roomId),
       this.redis.hset(`user:${userId}`, {
         displayName,
       }),
@@ -131,18 +132,11 @@ export class RoomService {
   }
 
   async getRoomByParticipant(userId: string): Promise<Room | undefined> {
-    const roomKeys = await this.redis.keys('participants:*');
-    
-    // Find the room that has this participant
-    for (const key of roomKeys) {
-      const roomId = key.replace('participants:', '');
-      const isMember = await this.redis.sismember(key, userId);
-      
-      if (isMember) {
-        return this.getRoom(roomId);
-      }
+    const rooms = await this.redis.smembers(`user_rooms:${userId}`);
+    if (rooms.length === 0) {
+      return undefined;
     }
-    
-    return undefined;
+
+    return this.getRoom(rooms[0]);
   }
 }

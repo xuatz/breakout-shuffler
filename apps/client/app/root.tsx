@@ -101,7 +101,6 @@ export default function App() {
 
     return () => {
       socket.off('hostNudged');
-      socket.disconnect();
     };
   }, [cookies._bsid, cookies._displayName, setCookie, setNudges]);
 

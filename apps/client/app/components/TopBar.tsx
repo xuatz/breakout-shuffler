@@ -148,7 +148,6 @@ export function TopBar() {
       <DisplayNameModal
         isOpen={isDisplayNameModalOpen}
         onClose={() => setIsDisplayNameModalOpen(false)}
-        currentName={cookies._displayName}
       />
 
       <NudgeModal
