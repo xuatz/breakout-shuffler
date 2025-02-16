@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { useAtom } from 'jotai';
-import { nudgesAtom, useNudgesListener } from '../atoms/nudgeWithListener';
+import { useNudgesListener } from '../atoms/nudgeWithListener';
 import { useCookies } from 'react-cookie';
 import { DisplayNameModal } from './DisplayNameModal';
 import { NudgeModal } from './NudgeModal';
@@ -56,19 +55,19 @@ export function TopBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleClearCookies = () => {
-    removeCookie('_bsid', {
+  const handleClearCookies = useCallback(() => {
+    removeCookie('_bsid', '', {
       path: '/',
       secure: import.meta.env.PROD,
       domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
     });
-    removeCookie('_displayName', {
+    removeCookie('_displayName', '', {
       path: '/',
       secure: import.meta.env.PROD,
       domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
     });
     setIsMenuOpen(false);
-  };
+  }, [removeCookie, setIsMenuOpen]);
 
   const menuOptions: MenuOption[] = [
     ...(isHost

@@ -63,7 +63,6 @@ app.use(
 
 app.get('/host', async (c) => {
   const userId = getCookie(c, '_bsid');
-  console.log('xz:userId', userId);
   if (!userId) {
     throw new HTTPException(403, { message: 'Missing userId' });
   }
