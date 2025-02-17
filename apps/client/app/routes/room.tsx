@@ -3,6 +3,7 @@ import type { Route } from '../+types/root';
 import { useParams } from 'react-router';
 import { useCookies } from 'react-cookie';
 import { UserList } from '../components/UserList';
+import { ErrorMessage } from '../components/ErrorMessage';
 import { sendSocketMessage, socket } from '~/lib/socket';
 
 export function meta({}: Route.MetaArgs) {
@@ -15,9 +16,47 @@ export function meta({}: Route.MetaArgs) {
 export default function Room() {
   const { roomId } = useParams();
   const [error, setError] = useState('');
-  const [cookies, setCookie] = useCookies(['_displayName']);
+  const [cookies, setCookie] = useCookies(['_bsid', '_displayName']);
   const [displayName, setDisplayName] = useState('');
   const [hasJoined, setHasJoined] = useState(false);
+
+  useEffect(
+    function restoreUserRoom() {
+      const fetchUserRoom = async () => {
+        try {
+          const response = await fetch(
+            `${import.meta.env.VITE_API_URL}/rooms/${roomId}/me`,
+            {
+              method: 'POST',
+              credentials: 'include',
+            }
+          );
+
+          if (response.status === 200) {
+            const { isParticipant } = await response.json();
+            if (isParticipant) {
+              setHasJoined(true);
+              sendSocketMessage('joinRoom', {
+                roomId,
+                displayName: cookies._displayName,
+              });
+            }
+          }
+        } catch (error) {
+          setError(
+            error instanceof Error
+              ? error.message
+              : 'Failed to restore room session'
+          );
+        }
+      };
+
+      if (cookies._bsid && roomId) {
+        fetchUserRoom();
+      }
+    },
+    [cookies._bsid, roomId, cookies._displayName]
+  );
 
   useEffect(() => {
     if (!displayName && cookies._displayName) {
@@ -103,8 +142,8 @@ export default function Room() {
 
         <div className="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-gray-900">
           {error && (
-            <div className="mb-4 p-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded">
-              {error}
+            <div className="mb-4">
+              <ErrorMessage message={error} />
             </div>
           )}
 

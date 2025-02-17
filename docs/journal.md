@@ -1,5 +1,13 @@
 # Development Journal
 
+## 20250218 part 2 - xz - feat: add room session restoration and standardize error handling
+
+- Added ErrorMessage component for consistent error display across components
+- Added restoreUserRoom functionality in room.tsx to handle page refresh scenarios
+- Standardized socket event handling in host.tsx by moving event listeners to useEffect
+- Improved error handling consistency between host.tsx and room.tsx
+- Updated code to follow established patterns for error display and socket event handling
+
 ## 20250218 - xz - refactor(server): extract Redis operations into repository layer
 
 - Created a new repository layer to handle Redis operations:

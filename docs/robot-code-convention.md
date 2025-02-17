@@ -38,6 +38,34 @@
   - Use flex with gap utilities (e.g., gap-x-2) for consistent spacing between elements
   - Prefer gap over margin/padding for element spacing when possible
 
+### Error Handling
+- Use the shared ErrorMessage component for displaying error messages
+- Wrap ErrorMessage in a container div for consistent spacing and width
+- Always include error state in components that make API calls or handle socket events
+- Use consistent error message format: `error instanceof Error ? error.message : 'Default message'`
+
+### Socket Event Handling
+- Set up socket event listeners in useEffect hooks
+- Include cleanup function to remove listeners
+- Group related socket events in the same useEffect
+- Handle errors through the 'error' socket event
+- Follow the pattern:
+  ```typescript
+  useEffect(() => {
+    const handleEventName = (data: DataType) => {
+      // Handle event
+    };
+
+    socket.on('eventName', handleEventName);
+    socket.on('error', handleError);
+
+    return () => {
+      socket.off('eventName', handleEventName);
+      socket.off('error', handleError);
+    };
+  }, [dependencies]);
+  ```
+
 ### Modal Components
 - Use a base Modal component for consistent styling and behavior
 - Implement click-outside behavior at the base Modal level

@@ -106,19 +106,31 @@ app.get('/rooms/:id', async (c) => {
   return c.json(room);
 });
 
+app.post('/rooms/:id/me', async (c) => {
+  const userId = getCookie(c, '_bsid');
+  if (!userId) {
+    throw new HTTPException(403, { message: 'Missing userId' });
+  }
+
+  const roomId = c.req.param('id');
+  if (!roomId) {
+    throw new HTTPException(400, { message: 'Missing roomId' });
+  }
+
+  const room = await roomService.getRoomByParticipant(userId)
+  
+  return c.json({ isParticipant: room?.id === roomId });
+})
+
 app.post('/rooms/:id/join', async (c) => {
-  console.log('xz:hoho');
   const roomId = c.req.param('id');
   const userId = getCookie(c, '_bsid');
-
-  console.log('xz:userId', userId);
 
   if (!userId) {
     throw new HTTPException(403, { message: 'Missing userId' });
   }
 
   const roomExists = await roomService.roomExists(roomId);
-  console.log('xz:roomExists', roomExists);
   if (!roomExists) {
     throw new HTTPException(404, { message: `Room ${roomId} does not exist.` });
   }

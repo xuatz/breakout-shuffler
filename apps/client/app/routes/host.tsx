@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useCookies } from 'react-cookie';
 import type { Room } from '../types';
 import { UserList } from '../components/UserList';
+import { ErrorMessage } from '../components/ErrorMessage';
 import { sendSocketMessage, socket } from '~/lib/socket';
 
 export function meta({}: Route.MetaArgs) {
@@ -55,22 +56,29 @@ export default function Host() {
     [cookies._bsid]
   );
 
+  useEffect(() => {
+    const handleRoomCreated = (room: Room) => {
+      setRoomId(room.id);
+    };
+
+    const handleError = ({ message }: { message: string }) => {
+      setError(message);
+    };
+
+    socket.on('roomCreated', handleRoomCreated);
+    socket.on('error', handleError);
+
+    return () => {
+      socket.off('roomCreated', handleRoomCreated);
+      socket.off('error', handleError);
+    };
+  }, []);
+
   const handleCreateRoom = async () => {
     try {
       setError('');
       setRoomId(null);
-
-      // Listen for room creation response
-      const handleRoomCreated = (room: Room) => {
-        setRoomId(room.id);
-      };
-
       socket.emit('createRoom');
-      socket.on('roomCreated', handleRoomCreated);
-
-      return () => {
-        socket.off('roomCreated', handleRoomCreated);
-      };
     } catch (error) {
       setError(
         error instanceof Error ? error.message : 'Failed to create room'
@@ -87,8 +95,8 @@ export default function Host() {
       </h1>
 
       {error && (
-        <div className="w-full max-w-md mb-4 p-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded">
-          {error}
+        <div className="w-full max-w-md mb-4">
+          <ErrorMessage message={error} />
         </div>
       )}
 

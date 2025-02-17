@@ -149,6 +149,7 @@ A real-time application that enables hosts to create rooms and participants to j
 
 - Participant disconnection handling
 - Room cleanup on host disconnect
+- Session restoration for participants (similar to host session restoration)
 
 ### Future Improvements
 
@@ -156,6 +157,7 @@ A real-time application that enables hosts to create rooms and participants to j
 - Enhanced participant management
 - Room chat functionality
 - Breakout room grouping features
+- Improved error handling and user feedback
 
 ## Technical Notes
 
