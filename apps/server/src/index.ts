@@ -5,9 +5,12 @@ import { getCookie } from 'hono/cookie';
 import type { Server as HTTPSServer } from 'node:http';
 import { Server as SocketIOServer } from 'socket.io';
 import { Redis } from 'ioredis';
-import { RoomService } from './modules/rooms/room.service';
-import { SocketService } from './modules/sockets/socket.service';
+import { RoomService } from './services/room.service';
+import { SocketService } from './services/socket.service';
 import { HTTPException } from 'hono/http-exception';
+import { RoomRepository } from './repositories/room.repository';
+import { UserRepository } from './repositories/user.repository';
+import { NudgeRepository } from './repositories/nudge.repository';
 
 const origin = [
   'http://localhost:3000',
@@ -24,8 +27,13 @@ const redis = new Redis({
   port: parseInt(process.env.REDIS_PORT || '6379'),
 });
 
+// Initialize repositories
+const roomRepository = new RoomRepository(redis);
+const userRepository = new UserRepository(redis);
+const nudgeRepository = new NudgeRepository(redis);
+
 // Initialize services
-const roomService = new RoomService(redis);
+const roomService = new RoomService(roomRepository, userRepository);
 
 const app = new Hono();
 const port = 9000;
@@ -49,7 +57,7 @@ const io = new SocketIOServer(server as HTTPSServer, {
 });
 
 // Initialize socket service
-const socketService = new SocketService(io, redis, roomService);
+const socketService = new SocketService(io, roomService, userRepository, nudgeRepository);
 
 app.use(
   '*',
@@ -88,8 +96,6 @@ app.get('/rooms', async (c) => {
   const rooms = await roomService.getRooms();
   return c.json({ rooms });
 });
-
-// ------------------------------
 
 app.get('/rooms/:id', async (c) => {
   const roomId = c.req.param('id');

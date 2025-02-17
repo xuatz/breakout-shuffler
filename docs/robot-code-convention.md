@@ -1,5 +1,24 @@
 # Code Conventions
 
+## Server Architecture
+
+### Repository Layer
+- Use repository pattern for data persistence operations
+- Each repository extends BaseRepository for common Redis operations
+- Follow consistent key naming patterns:
+  - Entity-specific data: `entity:{id}` (e.g., `room:{roomId}`)
+  - Relationship data: `relationship:{parentId}` (e.g., `host_nudges:{roomId}`)
+- Store complex data as JSON strings in Redis hashes
+- Include timestamps for time-sensitive data
+
+### Service Layer
+- Services use repositories for data access
+- Services contain business logic and orchestrate repository operations
+- Services should not directly interact with Redis
+- Keep services focused on their domain:
+  - RoomService: Room management and participant operations
+  - SocketService: Real-time communication and event handling
+
 ## UI Components
 
 ### Dark Mode Support
@@ -38,13 +57,6 @@
 - Group related socket events in the server implementation
 - Include proper error handling for each socket event
 - Persist relevant socket event data in Redis when needed
-
-### Redis Data Structure
-- Use consistent key naming patterns:
-  - Entity-specific data: `entity:{id}` (e.g., `room:{roomId}`)
-  - Relationship data: `relationship:{parentId}` (e.g., `host_nudges:{roomId}`)
-- Store complex data as JSON strings in Redis hashes
-- Include timestamps for time-sensitive data
 
 ## Docker
 

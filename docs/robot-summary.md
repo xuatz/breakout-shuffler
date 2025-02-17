@@ -3,6 +3,7 @@
 ## Application Overview
 
 A real-time application that enables hosts to create rooms and participants to join those rooms, built with:
+
 - Server: Deno with Socket.IO for real-time communication
 - Client: React with Socket.IO client
 - Data Store: Redis for room and participant data
@@ -11,32 +12,64 @@ A real-time application that enables hosts to create rooms and participants to j
 
 ### Server-Side Components
 
-1. **Room Service (`apps/server/src/modules/rooms/room.service.ts`)**
-   - Manages room-related operations using Redis
-   - Key features:
-     - Room creation with unique IDs
-     - Room retrieval and validation
-     - Participant management within rooms
-     - Redis data structure:
-       - `room:{roomId}` (hash) - stores room details
-       - `participants:{roomId}` (set) - stores participant IDs
-       - `host_rooms:{hostId}` (set) - tracks host's room
+1. **Repository Layer**
 
-2. **Socket Service (`apps/server/src/modules/sockets/socket.service.ts`)**
-   - Handles real-time communication
-   - Key events:
-     - `joinRoom` - handles participant joining
-     - `createRoom` - handles room creation
-     - `participantsUpdated` - broadcasts participant list updates
+   - **Base Repository (`apps/server/src/repositories/base.repository.ts`)**
+
+     - Abstract base class for Redis operations
+     - Common methods for hash, set operations
+
+   - **Room Repository (`apps/server/src/repositories/room.repository.ts`)**
+     - Handles room data persistence
+     - Key operations:
+       - Room creation and retrieval
+       - Participant management
+       - Room existence checks
+   - **User Repository (`apps/server/src/repositories/user.repository.ts`)**
+
+     - Manages user-related data
+     - Key operations:
+       - Display name management
+       - User-room relationships
+       - User info retrieval
+
+   - **Nudge Repository (`apps/server/src/repositories/nudge.repository.ts`)**
+     - Handles nudge functionality persistence
+     - Key operations:
+       - Nudge tracking and updates
+       - Nudge history retrieval
+       - Nudge clearing
+
+2. **Service Layer**
+
+   - **Room Service (`apps/server/src/services/room.service.ts`)**
+
+     - Business logic for room operations
+     - Uses RoomRepository and UserRepository
+     - Key features:
+       - Room creation with unique IDs
+       - Room retrieval and validation
+       - Participant management within rooms
+
+   - **Socket Service (`apps/server/src/services/socket.service.ts`)**
+     - Handles real-time communication
+     - Uses RoomService, UserRepository, and NudgeRepository
+     - Key events:
+       - `joinRoom` - handles participant joining
+       - `createRoom` - handles room creation
+       - `participantsUpdated` - broadcasts participant list updates
+       - `nudgeHost` - manages host notifications
 
 ### Client-Side Components
 
 1. **Socket Context (`apps/client/app/context/socket.tsx`)**
+
    - Provides socket instance throughout the app
    - Ensures socket is always available (non-null)
    - Handles connection lifecycle
 
 2. **Cookie Management**
+
    - Uses react-cookie for cookie management
    - Key cookies:
      - `_bsid`: Breakout Shuffler ID cookie
@@ -47,10 +80,12 @@ A real-time application that enables hosts to create rooms and participants to j
      - Path: '/'
 
 3. **Room Component (`apps/client/app/routes/room.tsx`)**
+
    - Handles room joining flow
    - Manages room state and participant interactions
 
 4. **UserList Component (`apps/client/app/components/UserList.tsx`)**
+
    - Displays room participants
    - Updates in real-time via socket events
    - Shows current user with "(you)" indicator
@@ -74,18 +109,21 @@ A real-time application that enables hosts to create rooms and participants to j
 ## Implementation Details
 
 ### Room Creation Flow
+
 1. Host initiates room creation
 2. Server generates unique room ID
 3. Room details stored in Redis
 4. Host automatically added as first participant
 
 ### Room Joining Flow
+
 1. Participant makes HTTP POST request to join room
 2. Server validates room and adds participant
 3. Socket connection established for real-time updates
 4. Participant list broadcast to all room members
 
 ### Real-time Updates
+
 - Socket.IO events used for immediate state synchronization
 - Participants receive updates when:
   - New participants join
@@ -95,6 +133,7 @@ A real-time application that enables hosts to create rooms and participants to j
 ## Current State
 
 ### Completed Features
+
 - Room creation with unique IDs
 - Room joining via HTTP + Socket.IO
 - Real-time participant list updates
@@ -107,10 +146,12 @@ A real-time application that enables hosts to create rooms and participants to j
 - Real-time nudge updates with animation
 
 ### In Progress
+
 - Participant disconnection handling
 - Room cleanup on host disconnect
 
 ### Future Improvements
+
 - Custom room IDs (currently auto-generated)
 - Enhanced participant management
 - Room chat functionality
@@ -119,6 +160,7 @@ A real-time application that enables hosts to create rooms and participants to j
 ## Technical Notes
 
 ### Redis Data Structure
+
 ```
 room:{roomId} (hash)
   - id: string
@@ -130,6 +172,9 @@ participants:{roomId} (set)
 
 host_rooms:{hostId} (set)
   - Set of room IDs (limited to one per host)
+
+user_rooms:{userId} (set)
+  - Set of room IDs
 
 user:{userId} (hash)
   - displayName: string
@@ -144,6 +189,7 @@ host_nudges:{roomId} (hash)
 ```
 
 ### Socket Events
+
 ```typescript
 // Server -> Client
 'joinedRoom': { userId: string, roomId: string }
@@ -164,6 +210,7 @@ host_nudges:{roomId} (hash)
 ## CI/CD Pipeline
 
 ### Docker Configuration
+
 - Multi-stage builds for optimized image sizes
 - Production-ready configurations:
   - Client: React application served via static files
@@ -172,6 +219,7 @@ host_nudges:{roomId} (hash)
   - Uses pnpm@10 for package management
 
 ### GitHub Actions Workflow
+
 - Automated Docker image builds on push to main branch
 - Builds and pushes both client and server images to GitHub Container Registry (ghcr.io)
 - Uses efficient caching and multi-platform build support
