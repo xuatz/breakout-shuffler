@@ -52,6 +52,7 @@ export class RoomService {
       this.redis.hset(`room:${roomId}`, room),
       this.redis.sadd(`participants:${roomId}`, hostId),
       this.redis.sadd(`host_rooms:${hostId}`, roomId),
+      this.redis.sadd(`user_rooms:${hostId}`, roomId),
     ]);
 
     const rooms = await this.getRooms();

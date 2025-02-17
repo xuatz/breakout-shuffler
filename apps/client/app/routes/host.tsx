@@ -65,8 +65,8 @@ export default function Host() {
         setRoomId(room.id);
       };
 
-      socket.on('roomCreated', handleRoomCreated);
       socket.emit('createRoom');
+      socket.on('roomCreated', handleRoomCreated);
 
       return () => {
         socket.off('roomCreated', handleRoomCreated);
