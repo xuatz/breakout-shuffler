@@ -43,15 +43,16 @@ export class SocketService {
       // Room events
       socket.on(
         'joinRoom',
-        async ({ roomId, displayName }: { roomId: string; displayName: string }) => {
+        async ({ roomId }: { roomId: string }) => {
           try {
             const userId = this.getUserId(socket);
-            await this.roomService.joinRoom(roomId, userId, displayName);
+            await this.roomService.joinRoom(roomId, userId);
             socket.join(roomId);
 
             socket.emit('joinedRoom', { userId, roomId });
 
             const participants = await this.roomService.getParticipants(roomId);
+            console.log('xz:participants', participants);
             this.io.to(roomId).emit('participantsUpdated', { participants });
           } catch (error) {
             this.handleError(socket, 'Join room error', error);
@@ -62,10 +63,9 @@ export class SocketService {
       socket.on('createRoom', async () => {
         try {
           const hostId = this.getUserId(socket);
-          const displayName = this.getDisplayName(socket);
-
-          if (displayName) {
-            await this.userRepository.updateDisplayName(hostId, displayName);
+          const displayName = await this.getDisplayName(hostId);
+          if (!displayName) {
+            throw new Error('Display name not found');
           }
 
           const room = await this.roomService.createRoom(hostId);
@@ -73,33 +73,12 @@ export class SocketService {
           socket.emit('roomCreated', room);
 
           const participants = await this.roomService.getParticipants(room.id);
+          console.log('xz:participants', participants);
           this.io.to(room.id).emit('participantsUpdated', { participants });
         } catch (error) {
           this.handleError(socket, 'Create room error', error);
         }
       });
-
-      // User events
-      socket.on(
-        'updateDisplayName',
-        async ({ displayName }: { displayName: string }) => {
-          try {
-            const userId = this.getUserId(socket);
-            await this.userRepository.updateDisplayName(userId, displayName);
-
-            const room = await this.roomService.getRoomByParticipant(userId);
-            if (!room) {
-              console.log('User is not in a room, do nothing.');
-              return;
-            }
-
-            const participants = await this.roomService.getParticipants(room.id);
-            this.io.to(room.id).emit('participantsUpdated', { participants });
-          } catch (error) {
-            this.handleError(socket, 'Update display name error', error);
-          }
-        }
-      );
 
       // Debug events
       socket.on(
@@ -123,15 +102,15 @@ export class SocketService {
             throw new Error('User is not in a room');
           }
 
-          const userInfo = await this.userRepository.getUserInfo(userId);
-          if (!userInfo?.displayName) {
+          const displayName = await this.getDisplayName(userId);
+          if (!displayName) {
             throw new Error('User display name not found');
           }
 
           await this.nudgeRepository.updateNudge(
             room.id,
             userId,
-            userInfo.displayName
+            displayName
           );
 
           const nudges = await this.nudgeRepository.getNudges(room.id);
@@ -185,10 +164,8 @@ export class SocketService {
     return userId;
   }
 
-  private getDisplayName(socket: Socket): string | undefined {
-    return decodeURI(
-      this.cookieService.extractDisplayName(socket.handshake.headers.cookie) || ''
-    );
+  private async getDisplayName(userId: string): Promise<string | undefined> {
+    return this.userRepository.getDisplayName(userId);
   }
 
   private handleError(socket: Socket, context: string, error: unknown) {

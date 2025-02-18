@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import type { Route } from '../+types/root';
 import { useParams } from 'react-router';
 import { useCookies } from 'react-cookie';
+import { useAtom } from 'jotai';
+import { displayNameAtom } from '~/atoms/displayName';
 import { UserList } from '../components/UserList';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { sendSocketMessage, socket } from '~/lib/socket';
@@ -16,9 +18,37 @@ export function meta({}: Route.MetaArgs) {
 export default function Room() {
   const { roomId } = useParams();
   const [error, setError] = useState('');
-  const [cookies, setCookie] = useCookies(['_bsid', '_displayName']);
-  const [displayName, setDisplayName] = useState('');
+  const [cookies] = useCookies(['_bsid']);
+  const [displayName, setDisplayName] = useAtom(displayNameAtom);
   const [hasJoined, setHasJoined] = useState(false);
+
+  const joinRoom = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/rooms/${roomId}/join`,
+        {
+          method: 'POST',
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        setError('Failed to join room');
+      }
+
+      sendSocketMessage('joinRoom', { roomId });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to join room');
+    }
+  }
+
+
+  const handleJoinRoom = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setError('');
+    await joinRoom();
+  };
 
   useEffect(
     function restoreUserRoom() {
@@ -34,12 +64,9 @@ export default function Room() {
 
           if (response.status === 200) {
             const { isParticipant } = await response.json();
+
             if (isParticipant) {
-              setHasJoined(true);
-              sendSocketMessage('joinRoom', {
-                roomId,
-                displayName: cookies._displayName,
-              });
+              await joinRoom();
             }
           }
         } catch (error) {
@@ -55,14 +82,8 @@ export default function Room() {
         fetchUserRoom();
       }
     },
-    [cookies._bsid, roomId, cookies._displayName]
+    [cookies._bsid, roomId]
   );
-
-  useEffect(() => {
-    if (!displayName && cookies._displayName) {
-      setDisplayName(cookies._displayName);
-    }
-  }, [cookies._displayName]);
 
   useEffect(() => {
     const handleJoinedRoom = () => {
@@ -82,43 +103,7 @@ export default function Room() {
     };
   }, [roomId]);
 
-  const handleJoinRoom = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/rooms/${roomId}/join`,
-        {
-          method: 'POST',
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        setError('Failed to join room');
-      }
-
-      if (displayName && displayName !== cookies._displayName) {
-        setCookie('_displayName', displayName, {
-          path: '/',
-          secure: import.meta.env.PROD,
-          domain: import.meta.env.PROD
-            ? 'some-other-domain'
-            : '.breakout.local',
-          maxAge: 7 * 24 * 60 * 60,
-        });
-      }
-
-      sendSocketMessage('joinRoom', {
-        roomId,
-        displayName,
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to join room');
-    }
-  };
+  
 
   if (!roomId) {
     return (

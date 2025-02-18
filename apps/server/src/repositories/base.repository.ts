@@ -5,11 +5,18 @@ export abstract class BaseRepository {
 
   protected async getHashAll<T>(key: string): Promise<T | undefined> {
     const data = await this.redis.hgetall(key);
-    return Object.keys(data).length > 0 ? (data as unknown as T) : undefined;
+    return Object.keys(data).length > 0 ? (data as T) : undefined;
+  }
+
+  protected async getHashField(key: string, field: string): Promise<string | null> {
+    return this.redis.hget(key, field);
   }
 
   protected async setHash(key: string, data: Record<string, any>): Promise<void> {
-    await this.redis.hset(key, data);
+    const entries = Object.entries(data).map(([field, value]) => [field, String(value)]);
+    if (entries.length > 0) {
+      await this.redis.hset(key, ...entries.flat());
+    }
   }
 
   protected async addToSet(key: string, member: string): Promise<void> {

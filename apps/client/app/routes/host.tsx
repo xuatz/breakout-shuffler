@@ -17,7 +17,7 @@ export function meta({}: Route.MetaArgs) {
 export default function Host() {
   const [roomId, setRoomId] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const [cookies] = useCookies(['_bsid', '_displayName']);
+  const [cookies] = useCookies(['_bsid']);
 
   useEffect(
     function restoreHostRoom() {
@@ -35,10 +35,7 @@ export default function Host() {
             const { room }: { room?: Room } = await response.json();
             if (room) {
               setRoomId(room.id);
-              sendSocketMessage('joinRoom', {
-                roomId: room.id,
-                displayName: cookies._displayName,
-              });
+              sendSocketMessage('joinRoom', { roomId: room.id });
               sendSocketMessage('getNudges');
             }
           }

@@ -70,14 +70,25 @@ A real-time application that enables hosts to create rooms and participants to j
 
 2. **Cookie Management**
 
-   - Uses react-cookie for cookie management
+   - Uses react-cookie for user identification
    - Key cookies:
      - `_bsid`: Breakout Shuffler ID cookie
-     - `_displayName`: User's display name
    - Cookie configuration:
      - Domain: Uses VITE_COOKIE_DOMAIN env var with fallback to '.breakout.local'
      - Secure: Enabled in production
      - Path: '/'
+
+3. **Display Name Management**
+   - Display names stored in Redis using UserRepository
+   - HTTP endpoints for display name operations:
+     - GET /me/displayName: Fetches user's display name, generates if not exists
+     - POST /me/displayName: Updates user's display name
+   - Client-side state management:
+     - Uses Jotai atom for centralized display name state
+     - Initializes display name on app load
+     - Updates trigger real-time participant list updates
+   - Display names persisted across sessions
+   - Automatic random name generation for new users
 
 3. **Room Component (`apps/client/app/routes/room.tsx`)**
 
@@ -203,7 +214,6 @@ host_nudges:{roomId} (hash)
 'joinRoom': { roomId: string, displayName: string }
 'createRoom': void
 'debugPing': { pingerId: string, roomId: string }
-'updateDisplayName': { displayName: string }
 'nudgeHost': void
 'clearNudges': void
 'getNudges': void

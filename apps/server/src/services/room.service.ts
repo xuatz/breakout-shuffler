@@ -52,8 +52,7 @@ export class RoomService {
 
   async joinRoom(
     roomId: string,
-    userId: string,
-    displayName: string
+    userId: string
   ): Promise<boolean> {
     const room = await this.roomRepository.getRoom(roomId);
     if (!room) {
@@ -63,7 +62,6 @@ export class RoomService {
     await Promise.all([
       this.roomRepository.addParticipant(roomId, userId),
       this.userRepository.addUserToRoom(userId, roomId),
-      this.userRepository.updateDisplayName(userId, displayName),
     ]);
 
     return true;
@@ -75,6 +73,7 @@ export class RoomService {
     const participants = await Promise.all(
       participantIds.map(async (id) => {
         const userData = await this.userRepository.getUserInfo(id);
+        console.log('xz:userData', userData);
         return {
           id,
           displayName: userData?.displayName,

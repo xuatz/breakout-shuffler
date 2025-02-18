@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useCookies } from 'react-cookie';
-import { sendSocketMessage } from '~/lib/socket';
+import { useState, useEffect } from 'react';
+import { useAtom } from 'jotai';
+import { displayNameAtom } from '~/atoms/displayName';
 import { Modal } from './Modal';
 
 interface DisplayNameModalProps {
@@ -8,33 +8,48 @@ interface DisplayNameModalProps {
   onClose: () => void;
 }
 
-export function DisplayNameModal({
-  isOpen,
-  onClose,
-}: DisplayNameModalProps) {
-  const [getCookie, setCookie] = useCookies(['_displayName']);
-  const [newDisplayName, setNewDisplayName] = useState(getCookie._displayName);
+export function DisplayNameModal({ isOpen, onClose }: DisplayNameModalProps) {
+  const [displayName, setDisplayName] = useAtom(displayNameAtom);
+  const [newDisplayName, setNewDisplayName] = useState(displayName);
 
-  const handleUpdateName = () => {
+  useEffect(() => {
+    setNewDisplayName(displayName);
+  }, [displayName]);
+
+  const onClickUpdate = async () => {
     if (!newDisplayName.trim()) return;
 
-    setCookie('_displayName', newDisplayName, {
-      path: '/',
-      secure: import.meta.env.PROD,
-      domain: import.meta.env.PROD ? 'some-other-domain' : '.breakout.local',
-      maxAge: 7 * 24 * 60 * 60,
-    });
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/me/displayName`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ displayName: newDisplayName }),
+        }
+      );
 
-    // Notify other clients
-    sendSocketMessage('updateDisplayName', {
-      displayName: newDisplayName,
-    });
+      if (!response.ok) {
+        throw new Error('Failed to update display name');
+      }
 
-    onClose();
+      setDisplayName(newDisplayName);
+      onClose();
+    } catch (error) {
+      console.error('Error updating display name:', error);
+    }
   };
 
+  const onClickCancel = () => {
+    setNewDisplayName(displayName);
+    onClose();
+  }
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Change Display Name">
+    <Modal isOpen={isOpen} onClose={onClickCancel} title="Change Display Name">
       <input
         type="text"
         value={newDisplayName}
@@ -46,13 +61,13 @@ export function DisplayNameModal({
       />
       <div className="mt-4 flex justify-end space-x-2">
         <button
-          onClick={onClose}
+          onClick={onClickCancel}
           className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
         >
           Cancel
         </button>
         <button
-          onClick={handleUpdateName}
+          onClick={onClickUpdate}
           className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 
                     dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
         >

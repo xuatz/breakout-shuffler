@@ -3,6 +3,8 @@ import { useNudgesListener } from '../atoms/nudgeWithListener';
 import { useCookies } from 'react-cookie';
 import { DisplayNameModal } from './DisplayNameModal';
 import { NudgeModal } from './NudgeModal';
+import { displayNameAtom } from '~/atoms/displayName';
+import { useAtom } from 'jotai';
 
 interface MenuOption {
   label: string;
@@ -11,7 +13,7 @@ interface MenuOption {
 }
 
 export function TopBar() {
-  const [cookies, removeCookie] = useCookies(['_bsid', '_displayName']);
+  const [cookies, removeCookie] = useCookies(['_bsid']);
   const [userInitial, setUserInitial] = useState('?');
   const [isDisplayNameModalOpen, setIsDisplayNameModalOpen] = useState(false);
   const [isNudgeModalOpen, setIsNudgeModalOpen] = useState(false);
@@ -21,6 +23,7 @@ export function TopBar() {
   const [isWiggling, setIsWiggling] = useState(false);
   const isHost =
     typeof window !== 'undefined' && window.location.pathname === '/host';
+  const [displayName] = useAtom(displayNameAtom);
 
   useNudgesListener(
     useCallback((get, set, newVal, prevVal) => {
@@ -31,10 +34,8 @@ export function TopBar() {
   );
 
   useEffect(() => {
-    if (cookies._displayName) {
-      setUserInitial(cookies._displayName.charAt(0).toUpperCase());
-    }
-  }, [cookies._displayName]);
+    setUserInitial(displayName.charAt(0).toUpperCase());
+  }, [displayName]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -57,11 +58,6 @@ export function TopBar() {
 
   const handleClearCookies = useCallback(() => {
     removeCookie('_bsid', '', {
-      path: '/',
-      secure: import.meta.env.PROD,
-      domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
-    });
-    removeCookie('_displayName', '', {
       path: '/',
       secure: import.meta.env.PROD,
       domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',

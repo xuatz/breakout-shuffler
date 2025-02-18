@@ -10,11 +10,11 @@ import { useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 import { useAtom } from 'jotai';
 import type { Route } from './+types/root';
-import { generateRandomName } from './lib/generateRandomName';
 import { TopBar } from './components/TopBar';
 import stylesheet from './app.css?url';
 import { socket } from './lib/socket';
 import { nudgesAtom } from './atoms/nudgeWithListener';
+import { displayNameAtom } from './atoms/displayName';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -50,8 +50,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const [cookies, setCookie] = useCookies(['_bsid', '_displayName']);
+  const [cookies, setCookie] = useCookies(['_bsid']);
   const [, setNudges] = useAtom(nudgesAtom);
+  const [, setDisplayName] = useAtom(displayNameAtom);
 
   const isHost =
     typeof window !== 'undefined' && window.location.pathname === '/host';
@@ -75,18 +76,31 @@ export default function App() {
       setCookie('_bsid', uniqueId, cookieOptions);
     }
 
-    if (!cookies._displayName) {
-      const randomName = generateRandomName();
-      setCookie('_displayName', randomName, cookieOptions);
-    }
+    const fetchDisplayName = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/me/displayName`,
+          {
+            credentials: 'include',
+          }
+        );
 
-    /**
-     * make sure cookie values are set before connecting to the socket
-     */
+        if (!response.ok) {
+          throw new Error('Failed to fetch display name');
+        }
+
+        const { displayName } = await response.json();
+        setDisplayName(displayName);
+      } catch (error) {
+        console.error('Error fetching display name:', error);
+      }
+    };
+
+    fetchDisplayName();
     socket.connect();
 
     // Set up socket event listeners
-    socket.on('hostNudged', ({ nudges }) => {
+    const handleHostNudged = ({ nudges }: { nudges: any[] }) => {
       if (!isHost) {
         return;
       }
@@ -97,12 +111,14 @@ export default function App() {
           lastNudge: new Date(nudge.lastNudge),
         }))
       );
-    });
+    };
+
+    socket.on('hostNudged', handleHostNudged);
 
     return () => {
-      socket.off('hostNudged');
+      socket.off('hostNudged', handleHostNudged);
     };
-  }, [cookies._bsid, cookies._displayName, setCookie, setNudges]);
+  }, [cookies._bsid, setCookie, setNudges, setDisplayName, isHost]);
 
   return <Outlet />;
 }

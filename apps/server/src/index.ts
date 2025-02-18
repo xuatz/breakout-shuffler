@@ -11,6 +11,7 @@ import { HTTPException } from 'hono/http-exception';
 import { RoomRepository } from './repositories/room.repository';
 import { UserRepository } from './repositories/user.repository';
 import { NudgeRepository } from './repositories/nudge.repository';
+import { generateRandomName } from './utils/generateRandomName';
 
 const origin = [
   'http://localhost:3000',
@@ -135,18 +136,62 @@ app.post('/rooms/:id/join', async (c) => {
     throw new HTTPException(404, { message: `Room ${roomId} does not exist.` });
   }
 
-  const displayName = getCookie(c, '_displayName');
-  if (!displayName) {
-    throw new HTTPException(403, { message: 'Missing displayName' });
-  }
-
-  const success = await roomService.joinRoom(roomId, userId, displayName);
+  const success = await roomService.joinRoom(roomId, userId);
 
   if (success) {
     return c.json({ success: true });
   }
 
   throw new HTTPException(500, { message: 'Failed to join room' });
+});
+
+app.get('/me/displayName', async (c) => {
+  const userId = getCookie(c, '_bsid');
+  if (!userId) {
+    throw new HTTPException(403, { message: 'Missing userId' });
+  }
+
+  console.log('[GET /me/displayName] Request from userId:', userId);
+  const displayName = await userRepository.getDisplayName(userId);
+  console.log('[GET /me/displayName] Current displayName:', displayName);
+
+  if (!displayName) {
+    const newDisplayName = generateRandomName();
+    console.log('[GET /me/displayName] Generated new displayName:', newDisplayName);
+    await userRepository.updateDisplayName(userId, newDisplayName);
+    const savedName = await userRepository.getDisplayName(userId);
+    console.log('[GET /me/displayName] Verified saved displayName:', savedName);
+    return c.json({ displayName: newDisplayName });
+  }
+
+  return c.json({ displayName });
+});
+
+app.post('/me/displayName', async (c) => {
+  const userId = getCookie(c, '_bsid');
+  if (!userId) {
+    throw new HTTPException(403, { message: 'Missing userId' });
+  }
+
+  console.log('[POST /me/displayName] Request from userId:', userId);
+  const body = await c.req.json();
+  console.log('[POST /me/displayName] Request body:', body);
+
+  if (!body.displayName) {
+    throw new HTTPException(400, { message: 'Missing displayName' });
+  }
+
+  await userRepository.updateDisplayName(userId, body.displayName);
+  const savedName = await userRepository.getDisplayName(userId);
+  console.log('[POST /me/displayName] Verified saved displayName:', savedName);
+
+  const room = await roomService.getRoomByParticipant(userId);
+  if (room) {
+    const participants = await roomService.getParticipants(room.id);
+    io.to(room.id).emit('participantsUpdated', { participants });
+  }
+
+  return c.json({ success: true });
 });
 
 app.get('/', (c) => {

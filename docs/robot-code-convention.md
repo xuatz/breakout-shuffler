@@ -77,6 +77,17 @@
 - Prefer atoms with listeners for state that needs side effects
 - Keep atom definitions in dedicated files under atoms/
 - Group related atoms in the same file (e.g., nudgeWithListener.ts)
+- Initialize global state in root.tsx when possible
+- Use atoms for data that needs to be shared across components
+
+### HTTP Endpoints
+- Use RESTful patterns for data operations:
+  - GET for retrieving data
+  - POST for creating/updating data
+- Group user-specific endpoints under /me/ path
+- Include proper error handling with appropriate HTTP status codes
+- Verify data persistence after write operations
+- Update real-time state (e.g., socket events) after successful HTTP operations
 
 ### Socket Messages
 - Keep socket message payloads minimal:

@@ -24,10 +24,4 @@ export class CookieService {
     });
   }
 
-  extractDisplayName(cookie?: string): string | undefined {
-    return this.extractCookieValue({
-      cookie,
-      key: '_displayName',
-    });
-  }
 }

@@ -1,6 +1,26 @@
 # Development Journal
 
-## 20250218 part 2 - xz - feat: add room session restoration and standardize error handling
+## 20250219 - xz - feat(robot): tweak displayName management strategy
+
+- Moved display name operations to HTTP endpoints:
+  - GET /me/displayName: Fetches or generates display name
+  - POST /me/displayName: Updates display name
+- Improved Redis operations:
+  - Enhanced BaseRepository with better hash field handling
+  - Added verification of saved data
+- Centralized state management:
+  - Created displayNameAtom for global state
+  - Initialize in root.tsx
+  - Share across components
+- Added real-time updates:
+  - Display name changes trigger participant list updates
+  - Removed socket events in favor of HTTP + Jotai
+- Updated documentation:
+  - Added HTTP endpoint conventions
+  - Updated state management patterns
+  - Revised socket event list
+
+## 20250218 part 2 - xz - feat(robot): add room session restoration and standardize error handling
 
 - Added ErrorMessage component for consistent error display across components
 - Added restoreUserRoom functionality in room.tsx to handle page refresh scenarios
@@ -8,7 +28,7 @@
 - Improved error handling consistency between host.tsx and room.tsx
 - Updated code to follow established patterns for error display and socket event handling
 
-## 20250218 - xz - refactor(server): extract Redis operations into repository layer
+## 20250218 - xz - refactor(robot): extract Redis operations into repository layer
 
 - Created a new repository layer to handle Redis operations:
 
