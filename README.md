@@ -1,5 +1,9 @@
 # Breakout Shuffler
 
+## MVP-20250220 Demo
+
+https://github.com/user-attachments/assets/f5aea545-46b0-435b-a3c4-45949166f40c
+
 ## Setup
 
 1. Ensure you have Node.js (v20+) installed
