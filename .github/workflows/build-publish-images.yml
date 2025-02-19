@@ -49,16 +49,6 @@ jobs:
             type=sha,prefix=,suffix=,format=short
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push Client image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: apps/client/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta-client.outputs.tags }}
-          labels: ${{ steps.meta-client.outputs.labels }}
-          push: true
-
       - name: Build and push Server image
         uses: docker/build-push-action@v6
         with:
@@ -67,4 +57,14 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta-server.outputs.tags }}
           labels: ${{ steps.meta-server.outputs.labels }}
+          push: true
+
+      - name: Build and push Client image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/client/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta-client.outputs.tags }}
+          labels: ${{ steps.meta-client.outputs.labels }}
           push: true
