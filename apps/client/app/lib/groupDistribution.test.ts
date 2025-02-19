@@ -19,7 +19,9 @@ describe('calculateGroupDistribution', () => {
     it('handles remaining participants by redistributing when small remainder', () => {
       // 21 participants with size 4 should create 4,4,4,3,3,3 groups
       // instead of 4,4,4,4,4,1
-      expect(calculateGroupDistribution(21, 'size', 4)).toEqual([4, 4, 4, 3, 3, 3]);
+      expect(calculateGroupDistribution(21, 'size', 4)).toEqual([
+        4, 4, 4, 3, 3, 3,
+      ]);
     });
 
     it('creates a separate group for larger remainders', () => {

@@ -36,7 +36,6 @@ export function UserList({
     }: {
       participants: User[];
     }) => {
-      console.log('xz:handleParticipantsUpdated:participants', participants);
       setUsers(participants);
     };
 

@@ -4,6 +4,13 @@ import { UserRepository } from '../repositories/user.repository';
 import { NudgeRepository } from '../repositories/nudge.repository';
 import { CookieService } from './cookie.service';
 
+interface GroupAllocationRequest {
+  roomId: string;
+  mode: 'size' | 'count';
+  value: number;
+  distribution: number[]; // array of group sizes
+}
+
 export class SocketService {
   private clientMap: Map<string, Socket>;
   private cookieService: CookieService;
@@ -41,24 +48,29 @@ export class SocketService {
       });
 
       // Room events
-      socket.on(
-        'joinRoom',
-        async ({ roomId }: { roomId: string }) => {
-          try {
-            const userId = this.getUserId(socket);
-            await this.roomService.joinRoom(roomId, userId);
-            socket.join(roomId);
+      socket.on('joinRoom', async ({ roomId }: { roomId: string }) => {
+        try {
+          const userId = this.getUserId(socket);
+          await this.roomService.joinRoom(roomId, userId);
+          socket.join(roomId);
 
-            socket.emit('joinedRoom', { userId, roomId });
+          socket.emit('joinedRoom', { userId, roomId });
 
-            const participants = await this.roomService.getParticipants(roomId);
-            console.log('xz:participants', participants);
-            this.io.to(roomId).emit('participantsUpdated', { participants });
-          } catch (error) {
-            this.handleError(socket, 'Join room error', error);
+          const participants = await this.roomService.getParticipants(roomId);
+          this.io.to(roomId).emit('participantsUpdated', { participants });
+
+          // Send current room state to the joining participant
+          const room = await this.roomService.getRoom(roomId);
+          if (room) {
+            socket.emit('roomStateUpdated', {
+              state: room.state,
+              groups: room.groups,
+            });
           }
+        } catch (error) {
+          this.handleError(socket, 'Join room error', error);
         }
-      );
+      });
 
       socket.on('createRoom', async () => {
         try {
@@ -73,10 +85,82 @@ export class SocketService {
           socket.emit('roomCreated', room);
 
           const participants = await this.roomService.getParticipants(room.id);
-          console.log('xz:participants', participants);
           this.io.to(room.id).emit('participantsUpdated', { participants });
         } catch (error) {
           this.handleError(socket, 'Create room error', error);
+        }
+      });
+
+      // Breakout events
+      socket.on('startBreakout', async (request: GroupAllocationRequest) => {
+        try {
+          const userId = this.getUserId(socket);
+          const room = await this.roomService.getRoom(request.roomId);
+
+          if (!room) {
+            throw new Error('Room not found');
+          }
+
+          if (room.hostId !== userId) {
+            throw new Error('Only the host can start breakout');
+          }
+
+          const updatedRoom = await this.roomService.startBreakout(
+            request.roomId,
+            request.distribution
+          );
+          this.io.to(request.roomId).emit('roomStateUpdated', {
+            state: updatedRoom.state,
+            groups: updatedRoom.groups,
+          });
+        } catch (error) {
+          this.handleError(socket, 'Start breakout error', error);
+        }
+      });
+
+      socket.on('endBreakout', async ({ roomId }: { roomId: string }) => {
+        try {
+          const userId = this.getUserId(socket);
+          const room = await this.roomService.getRoom(roomId);
+
+          if (!room) {
+            throw new Error('Room not found');
+          }
+
+          if (room.hostId !== userId) {
+            throw new Error('Only the host can end breakout');
+          }
+
+          const updatedRoom = await this.roomService.endBreakout(roomId);
+          this.io.to(roomId).emit('roomStateUpdated', {
+            state: updatedRoom.state,
+            groups: updatedRoom.groups,
+          });
+        } catch (error) {
+          this.handleError(socket, 'End breakout error', error);
+        }
+      });
+
+      socket.on('abortBreakout', async ({ roomId }: { roomId: string }) => {
+        try {
+          const userId = this.getUserId(socket);
+          const room = await this.roomService.getRoom(roomId);
+
+          if (!room) {
+            throw new Error('Room not found');
+          }
+
+          if (room.hostId !== userId) {
+            throw new Error('Only the host can abort breakout');
+          }
+
+          const updatedRoom = await this.roomService.abortBreakout(roomId);
+          this.io.to(roomId).emit('roomStateUpdated', {
+            state: updatedRoom.state,
+            groups: updatedRoom.groups,
+          });
+        } catch (error) {
+          this.handleError(socket, 'Abort breakout error', error);
         }
       });
 
@@ -107,11 +191,7 @@ export class SocketService {
             throw new Error('User display name not found');
           }
 
-          await this.nudgeRepository.updateNudge(
-            room.id,
-            userId,
-            displayName
-          );
+          await this.nudgeRepository.updateNudge(room.id, userId, displayName);
 
           const nudges = await this.nudgeRepository.getNudges(room.id);
           this.io.to(room.id).emit('hostNudged', { nudges });
@@ -157,7 +237,9 @@ export class SocketService {
   }
 
   private getUserId(socket: Socket): string {
-    const userId = this.cookieService.extractUserId(socket.handshake.headers.cookie);
+    const userId = this.cookieService.extractUserId(
+      socket.handshake.headers.cookie
+    );
     if (!userId) {
       throw new Error('No user ID found');
     }

@@ -12,20 +12,20 @@ export function calculateGroupDistribution(
     // Group Size Mode
     const targetSize = value;
     const totalGroups = Math.ceil(totalParticipants / targetSize);
-    
+
     if (totalGroups === 1) return [totalParticipants];
-    
+
     // Calculate the minimum size for smaller groups
     const minSize = Math.floor(totalParticipants / totalGroups);
     const remainder = totalParticipants % totalGroups;
-    
+
     // Create array of minimum sizes
     const distribution = Array(totalGroups).fill(minSize);
-    
+
     // Distribute the remainder to achieve target size where possible
-    let remainingToDistribute = totalParticipants - (minSize * totalGroups);
+    let remainingToDistribute = totalParticipants - minSize * totalGroups;
     let index = 0;
-    
+
     while (remainingToDistribute > 0) {
       const currentAddition = Math.min(
         targetSize - distribution[index],
@@ -35,7 +35,7 @@ export function calculateGroupDistribution(
       remainingToDistribute -= currentAddition;
       index++;
     }
-    
+
     // Sort in descending order to have larger groups first
     return distribution.sort((a, b) => b - a);
   } else {
@@ -43,9 +43,9 @@ export function calculateGroupDistribution(
     const targetGroups = Math.min(value, totalParticipants);
     const baseSize = Math.floor(totalParticipants / targetGroups);
     const remainder = totalParticipants % targetGroups;
-    
-    return Array(targetGroups).fill(0).map((_, index) => 
-      baseSize + (index < remainder ? 1 : 0)
-    );
+
+    return Array(targetGroups)
+      .fill(0)
+      .map((_, index) => baseSize + (index < remainder ? 1 : 0));
   }
 }

@@ -9,4 +9,6 @@ export interface Room {
   hostId: string;
   createdAt: Date;
   users: User[];
+  state: 'waiting' | 'active';
+  groups?: { [groupId: string]: string[] };
 }

@@ -46,7 +46,7 @@ export function DisplayNameModal({ isOpen, onClose }: DisplayNameModalProps) {
   const onClickCancel = () => {
     setNewDisplayName(displayName);
     onClose();
-  }
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClickCancel} title="Change Display Name">

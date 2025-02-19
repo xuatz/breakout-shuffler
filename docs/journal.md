@@ -1,5 +1,42 @@
 # Development Journal
 
+## 20250219 part 2 - xz - feat: implement breakout room functionality
+
+Added breakout room functionality with the following features:
+
+1. Group Allocation:
+   - Two modes: Group Size and Number of Groups
+   - Real-time preview of group distribution
+   - Server-side random participant assignment
+   - Intelligent handling of uneven distributions
+
+2. Room State Management:
+   - Added 'waiting' and 'active' states
+   - State persists across page reloads
+   - Enhanced session restoration
+
+3. Host Controls:
+   - "Breakout!" button to start session
+   - "End" and "Abort" buttons for session control
+   - Real-time group distribution preview
+
+4. Participant Experience:
+   - Clear group assignment display
+   - State persists across page reloads
+
+Changes made:
+- Added group distribution algorithm with test suite
+- Created activeRoom atom for state management
+- Updated host screen with group allocation UI
+- Enhanced room component to show group assignments
+- Added socket events for breakout control
+- Updated documentation
+
+Future considerations:
+- Handle late-joining participants (purgatory area)
+- Different UIs for host/participants in active state
+- Group naming/labeling features
+
 ## 20250219 - xz - feat(robot): add group allocation UI and algorithm
 
 Added a new feature to the host screen that allows hosts to organize participants into groups using two different modes:

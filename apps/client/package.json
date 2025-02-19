@@ -8,7 +8,8 @@
     "start": "npx sirv-cli ./build/client/ --single",
     "typecheck": "react-router typegen && tsc",
     "prettier": "prettier --write app",
-    "test": "vitest"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@react-router/node": "^7.1.5",

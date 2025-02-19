@@ -1,11 +1,5 @@
 export class CookieService {
-  extractCookieValue({
-    cookie,
-    key,
-  }: {
-    cookie?: string;
-    key: string;
-  }) {
+  extractCookieValue({ cookie, key }: { cookie?: string; key: string }) {
     if (!cookie) return undefined;
 
     const cookies = cookie.split(';').reduce((acc, curr) => {
@@ -23,5 +17,4 @@ export class CookieService {
       key: '_bsid',
     });
   }
-
 }

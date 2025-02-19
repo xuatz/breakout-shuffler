@@ -58,7 +58,12 @@ const io = new SocketIOServer(server as HTTPSServer, {
 });
 
 // Initialize socket service
-const socketService = new SocketService(io, roomService, userRepository, nudgeRepository);
+const socketService = new SocketService(
+  io,
+  roomService,
+  userRepository,
+  nudgeRepository
+);
 
 app.use(
   '*',
@@ -118,10 +123,10 @@ app.post('/rooms/:id/me', async (c) => {
     throw new HTTPException(400, { message: 'Missing roomId' });
   }
 
-  const room = await roomService.getRoomByParticipant(userId)
-  
+  const room = await roomService.getRoomByParticipant(userId);
+
   return c.json({ isParticipant: room?.id === roomId });
-})
+});
 
 app.post('/rooms/:id/join', async (c) => {
   const roomId = c.req.param('id');
@@ -157,7 +162,10 @@ app.get('/me/displayName', async (c) => {
 
   if (!displayName) {
     const newDisplayName = generateRandomName();
-    console.log('[GET /me/displayName] Generated new displayName:', newDisplayName);
+    console.log(
+      '[GET /me/displayName] Generated new displayName:',
+      newDisplayName
+    );
     await userRepository.updateDisplayName(userId, newDisplayName);
     const savedName = await userRepository.getDisplayName(userId);
     console.log('[GET /me/displayName] Verified saved displayName:', savedName);

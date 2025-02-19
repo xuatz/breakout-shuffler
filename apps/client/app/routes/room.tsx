@@ -4,6 +4,7 @@ import { useParams } from 'react-router';
 import { useCookies } from 'react-cookie';
 import { useAtom } from 'jotai';
 import { displayNameAtom } from '~/atoms/displayName';
+import { activeRoomAtom, userGroupAtom } from '~/atoms/activeRoom';
 import { UserList } from '../components/UserList';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { sendSocketMessage, socket } from '~/lib/socket';
@@ -21,6 +22,8 @@ export default function Room() {
   const [cookies] = useCookies(['_bsid']);
   const [displayName, setDisplayName] = useAtom(displayNameAtom);
   const [hasJoined, setHasJoined] = useState(false);
+  const [activeRoom, setActiveRoom] = useAtom(activeRoomAtom);
+  const userGroup = useAtom(userGroupAtom)[0];
 
   const joinRoom = async () => {
     try {
@@ -40,8 +43,7 @@ export default function Room() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to join room');
     }
-  }
-
+  };
 
   const handleJoinRoom = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,16 +96,32 @@ export default function Room() {
       setError(message);
     };
 
+    const handleRoomStateUpdated = ({
+      state,
+      groups,
+    }: {
+      state: 'waiting' | 'active';
+      groups?: { [groupId: string]: string[] };
+    }) => {
+      if (roomId) {
+        setActiveRoom({
+          roomId,
+          state,
+          groups,
+        });
+      }
+    };
+
     socket.on('joinedRoom', handleJoinedRoom);
     socket.on('error', handleError);
+    socket.on('roomStateUpdated', handleRoomStateUpdated);
 
     return () => {
       socket.off('joinedRoom', handleJoinedRoom);
       socket.off('error', handleError);
+      socket.off('roomStateUpdated', handleRoomStateUpdated);
     };
-  }, [roomId]);
-
-  
+  }, [roomId, setActiveRoom]);
 
   if (!roomId) {
     return (
@@ -176,6 +194,13 @@ export default function Room() {
       </h1>
 
       <div className="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-gray-900">
+        {activeRoom?.state === 'active' && userGroup && (
+          <div className="mb-6 p-4 bg-blue-100 dark:bg-blue-900 rounded-lg">
+            <p className="text-lg font-semibold text-blue-800 dark:text-blue-100">
+              You are in Group {userGroup}
+            </p>
+          </div>
+        )}
         <UserList roomId={roomId} />
       </div>
     </div>

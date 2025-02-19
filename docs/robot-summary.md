@@ -162,12 +162,39 @@ A real-time application that enables hosts to create rooms and participants to j
 - Room cleanup on host disconnect
 - Session restoration for participants (similar to host session restoration)
 
+### Breakout Room Features
+
+1. **Group Allocation**
+   - Two allocation modes:
+     - Group Size: Specify desired size per group
+     - Number of Groups: Specify total number of groups
+   - Real-time preview of group distribution
+   - Intelligent handling of uneven distributions
+   - Random participant assignment by server
+
+2. **Room States**
+   - 'waiting': Initial state, host configures groups
+   - 'active': Breakout session in progress
+   - State persists across page reloads
+
+3. **Host Controls**
+   - "Breakout!" button to start session
+   - "End" button to conclude normally
+   - "Abort" button for early termination
+   - Real-time group distribution preview
+
+4. **Participant Experience**
+   - See assigned group number during active state
+   - State persists across page reloads
+   - Simple, clear group assignment display
+
 ### Future Improvements
 
 - Custom room IDs (currently auto-generated)
 - Enhanced participant management
 - Room chat functionality
-- Breakout room grouping features
+- Late-joining participant handling (purgatory area)
+- Different UIs for host/participants in active state
 - Improved error handling and user feedback
 
 ## Technical Notes

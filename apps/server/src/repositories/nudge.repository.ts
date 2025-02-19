@@ -23,13 +23,20 @@ export class NudgeRepository extends BaseRepository {
     return Object.values(allNudges).map((data) => JSON.parse(data));
   }
 
-  async getNudgeForUser(roomId: string, userId: string): Promise<NudgeData | undefined> {
+  async getNudgeForUser(
+    roomId: string,
+    userId: string
+  ): Promise<NudgeData | undefined> {
     const key = this.getKey(roomId);
     const nudgeData = await this.redis.hget(key, userId);
     return nudgeData ? JSON.parse(nudgeData) : undefined;
   }
 
-  async updateNudge(roomId: string, userId: string, displayName: string): Promise<void> {
+  async updateNudge(
+    roomId: string,
+    userId: string,
+    displayName: string
+  ): Promise<void> {
     const key = this.getKey(roomId);
     const existingData = await this.getNudgeForUser(roomId, userId);
 

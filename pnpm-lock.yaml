@@ -108,6 +108,9 @@ importers:
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
+      vitest:
+        specifier: ^3.0.6
+        version: 3.0.6(@types/node@20.17.10)(lightningcss@1.29.1)
 
 packages:
 
