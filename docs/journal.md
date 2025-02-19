@@ -1,5 +1,31 @@
 # Development Journal
 
+## 20250219 - xz - feat(robot): add group allocation UI and algorithm
+
+Added a new feature to the host screen that allows hosts to organize participants into groups using two different modes:
+
+1. Group Size Mode:
+   - Host specifies the desired size for each group
+   - Algorithm optimally distributes participants, handling remainders intelligently
+   - Example: With 21 participants and group size 4, creates 4,4,4,3,3,3 groups
+
+2. Number of Groups Mode:
+   - Host specifies the total number of groups desired
+   - Participants are distributed evenly across groups
+   - Example: With 10 participants and 3 groups, creates 4,3,3 groups
+
+Changes made:
+- Created groupDistribution.ts with algorithm for both modes
+- Added comprehensive test suite in groupDistribution.test.ts
+- Updated host screen UI with mode toggle and group size/count input
+- Added real-time preview of group distribution
+- Updated documentation in robot-summary.md
+
+Next steps:
+- Implement actual group assignment functionality
+- Add persistence for group settings
+- Consider adding group naming/labeling features
+
 ## 20250219 - xz - feat(robot): tweak displayName management strategy
 
 - Moved display name operations to HTTP endpoints:

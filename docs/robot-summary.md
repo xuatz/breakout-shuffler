@@ -238,9 +238,30 @@ host_nudges:{roomId} (hash)
 - Images tagged with commit SHA and latest tags
 - Images published under repository namespace (e.g., owner/repo/client, owner/repo/server)
 
+## Group Allocation Feature
+
+The application includes a flexible group allocation system that allows hosts to organise participants in two ways:
+
+1. **Group Size Mode**
+   - Host specifies desired group size
+   - Algorithm creates optimal distribution
+   - Handles remainders intelligently:
+     - Redistributes 1-2 remaining participants across existing groups
+     - Creates new group for larger remainders
+   - Example: 21 participants with size 4 creates 4,4,4,3,3,3 groups
+
+2. **Number of Groups Mode**
+   - Host specifies desired number of groups
+   - Distributes participants evenly
+   - Handles remainders by incrementing group sizes
+   - Example: 10 participants in 3 groups creates 4,3,3 groups
+
+The UI provides real-time preview of group distribution as participants join or leave the room.
+
 ## Next Steps
 
 1. Implement proper error handling for edge cases
 2. Add participant disconnection cleanup
 3. Add room deletion when host disconnects
 4. Enhance UI/UX for room management
+5. Implement actual group assignment functionality

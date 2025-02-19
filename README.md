@@ -71,8 +71,8 @@ Uncategorised ideas
 
 * clients should send periodic healthcheck back to server, so we know which clients are actually active
 * host should be able to click on user name, and remove them from the room (for cleanup)
-* participants can click on "nudge host" on their screen, and it will appear as a notification in the host (maybe in the top right hand corner)
-    * each time they press nudge, it should bring them to the top of the list, and add a counter to the number of times they nudged host
+* ~~participants can click on "nudge host" on their screen, and it will appear as a notification in the host (maybe in the top right hand corner)~~
+    * ~~each time they press nudge, it should bring them to the top of the list, and add a counter to the number of times they nudged host~~
     * host can then click on the user, and put them into xxx group easily
     * host can also "freeze" user that is abusing the nudge, which will put them in a separate tab
-
+* need to think about how the application should handle new participants joining when a room session is happening

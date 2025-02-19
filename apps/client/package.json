@@ -7,7 +7,8 @@
     "dev": "react-router dev",
     "start": "npx sirv-cli ./build/client/ --single",
     "typecheck": "react-router typegen && tsc",
-    "prettier": "prettier --write app"
+    "prettier": "prettier --write app",
+    "test": "vitest"
   },
   "dependencies": {
     "@react-router/node": "^7.1.5",
@@ -31,6 +32,7 @@
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2",
     "vite": "^5.4.11",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.0.6"
   }
 }
