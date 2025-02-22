@@ -102,8 +102,12 @@ A real-time application that enables hosts to create rooms and participants to j
    - Updates in real-time via socket events
    - Shows current user with "(you)" indicator
    - Debug features:
+     - Debug Mode: Toggleable via cookie in the top bar menu
      - Ping: Test connection with other participants
      - Nudge Host: Allow participants to notify host (non-host only)
+     - Add Dummy Participants (when debug mode enabled):
+       - Host-only controls to add 1 or 10 dummy participants for testing
+       - Dummy participants get random names with "(dummy)" suffix
 
 6. **TopBar Component (`apps/client/app/components/TopBar.tsx`)**
    - Sticky top bar with user icon and dropdown menu
@@ -245,6 +249,7 @@ host_nudges:{roomId} (hash)
 'joinRoom': { roomId: string, displayName: string }
 'createRoom': void
 'debugPing': { pingerId: string, roomId: string }
+'debugAddDummyParticipants': { roomId: string, count: number }
 'nudgeHost': void
 'clearNudges': void
 'getNudges': void

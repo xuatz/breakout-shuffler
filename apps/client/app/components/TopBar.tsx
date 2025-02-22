@@ -13,7 +13,7 @@ interface MenuOption {
 }
 
 export function TopBar() {
-  const [cookies, removeCookie] = useCookies(['_bsid']);
+  const [cookies, setCookie, removeCookie] = useCookies(['_bsid', '_debug']);
   const [userInitial, setUserInitial] = useState('?');
   const [isDisplayNameModalOpen, setIsDisplayNameModalOpen] = useState(false);
   const [isNudgeModalOpen, setIsNudgeModalOpen] = useState(false);
@@ -57,7 +57,12 @@ export function TopBar() {
   }, []);
 
   const handleClearCookies = useCallback(() => {
-    removeCookie('_bsid', '', {
+    removeCookie('_bsid', {
+      path: '/',
+      secure: import.meta.env.PROD,
+      domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
+    });
+    removeCookie('_debug', {
       path: '/',
       secure: import.meta.env.PROD,
       domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
@@ -87,6 +92,25 @@ export function TopBar() {
     {
       label: '⚙️ Debug',
       onClick: () => {}, // This is just a section header
+    },
+    {
+      label: `${cookies._debug ? 'Disable' : 'Enable'} Debug Mode`,
+      onClick: () => {
+        if (cookies._debug) {
+          setCookie('_debug', false, {
+            path: '/',
+            secure: import.meta.env.PROD,
+            domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
+          });
+        } else {
+          setCookie('_debug', true, {
+            path: '/',
+            secure: import.meta.env.PROD,
+            domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
+          });
+        }
+        setIsMenuOpen(false);
+      },
     },
     {
       label: 'Clear Cookies',

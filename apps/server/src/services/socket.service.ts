@@ -3,6 +3,7 @@ import { RoomService } from './room.service';
 import { UserRepository } from '../repositories/user.repository';
 import { NudgeRepository } from '../repositories/nudge.repository';
 import { CookieService } from './cookie.service';
+import { generateRandomName } from '../utils/generateRandomName';
 
 interface GroupAllocationRequest {
   roomId: string;
@@ -173,6 +174,37 @@ export class SocketService {
             socket.to(roomId).emit('debugPing', { pingerId, roomId });
           } catch (error) {
             this.handleError(socket, 'Debug ping error', error);
+          }
+        }
+      );
+
+      socket.on(
+        'debugAddDummyParticipants',
+        async ({ roomId, count }: { roomId: string; count: number }) => {
+          try {
+            const userId = this.getUserId(socket);
+            const room = await this.roomService.getRoom(roomId);
+
+            if (!room) {
+              throw new Error('Room not found');
+            }
+
+            if (room.hostId !== userId) {
+              throw new Error('Only the host can add dummy participants');
+            }
+
+            // Add dummy participants
+            for (let i = 0; i < count; i++) {
+              const dummyId = `dummy-${Date.now()}-${i}`;
+              const dummyName = `${generateRandomName()} (dummy)`;
+              await this.userRepository.updateDisplayName(dummyId, dummyName);
+              await this.roomService.joinRoom(roomId, dummyId);
+            }
+
+            const participants = await this.roomService.getParticipants(roomId);
+            this.io.to(roomId).emit('participantsUpdated', { participants });
+          } catch (error) {
+            this.handleError(socket, 'Add dummy participants error', error);
           }
         }
       );
