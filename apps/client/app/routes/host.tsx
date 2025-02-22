@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ClipboardIcon } from '@heroicons/react/24/outline';
 import type { Route } from './+types/host';
 import { QRCodeSVG } from 'qrcode.react';
 import { useCookies } from 'react-cookie';
@@ -19,6 +20,7 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Host() {
   const [error, setError] = useState('');
+  const [showCopied, setShowCopied] = useState(false);
   const [cookies] = useCookies(['_bsid']);
   const [groupingMode, setGroupingMode] = useState<'size' | 'count'>('size');
   const [groupSize, setGroupSize] = useState(4);
@@ -193,10 +195,15 @@ export default function Host() {
                 />
               </div>
               <button
-                onClick={() => navigator.clipboard.writeText(joinUrl)}
-                className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                onClick={() => {
+                  navigator.clipboard.writeText(joinUrl);
+                  setShowCopied(true);
+                  setTimeout(() => setShowCopied(false), 8000);
+                }}
+                className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-x-2"
               >
-                Copy Room Link
+                <span>{showCopied ? 'Copied!' : 'Copy Room Link'}</span>
+                <ClipboardIcon className="h-5 w-5" />
               </button>
               <span className="text-gray-700 dark:text-gray-300">
                 {joinUrl}
