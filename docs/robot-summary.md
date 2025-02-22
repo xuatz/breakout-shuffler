@@ -4,9 +4,9 @@
 
 A real-time application that enables hosts to create rooms and participants to join those rooms, built with:
 
-- Server: Deno with Socket.IO for real-time communication
 - Client: React with Socket.IO client
-- Data Store: Redis for room and participant data
+- Server: Node.js with Socket.IO for real-time communication
+  - Data Store: Redis for room and participant data
 
 ## Architecture
 
@@ -79,6 +79,7 @@ A real-time application that enables hosts to create rooms and participants to j
      - Path: '/'
 
 3. **Display Name Management**
+
    - Display names stored in Redis using UserRepository
    - HTTP endpoints for display name operations:
      - GET /me/displayName: Fetches user's display name, generates if not exists
@@ -90,12 +91,12 @@ A real-time application that enables hosts to create rooms and participants to j
    - Display names persisted across sessions
    - Automatic random name generation for new users
 
-3. **Room Component (`apps/client/app/routes/room.tsx`)**
+4. **Room Component (`apps/client/app/routes/room.tsx`)**
 
    - Handles room joining flow
    - Manages room state and participant interactions
 
-4. **UserList Component (`apps/client/app/components/UserList.tsx`)**
+5. **UserList Component (`apps/client/app/components/UserList.tsx`)**
 
    - Displays room participants
    - Updates in real-time via socket events
@@ -104,7 +105,7 @@ A real-time application that enables hosts to create rooms and participants to j
      - Ping: Test connection with other participants
      - Nudge Host: Allow participants to notify host (non-host only)
 
-5. **TopBar Component (`apps/client/app/components/TopBar.tsx`)**
+6. **TopBar Component (`apps/client/app/components/TopBar.tsx`)**
    - Sticky top bar with user icon and dropdown menu
    - Shows first letter of user's display name
    - Features:
@@ -165,6 +166,7 @@ A real-time application that enables hosts to create rooms and participants to j
 ### Breakout Room Features
 
 1. **Group Allocation**
+
    - Two allocation modes:
      - Group Size: Specify desired size per group
      - Number of Groups: Specify total number of groups
@@ -173,11 +175,13 @@ A real-time application that enables hosts to create rooms and participants to j
    - Random participant assignment by server
 
 2. **Room States**
+
    - 'waiting': Initial state, host configures groups
    - 'active': Breakout session in progress
    - State persists across page reloads
 
 3. **Host Controls**
+
    - "Breakout!" button to start session
    - "End" button to conclude normally
    - "Abort" button for early termination
@@ -270,6 +274,7 @@ host_nudges:{roomId} (hash)
 The application includes a flexible group allocation system that allows hosts to organise participants in two ways:
 
 1. **Group Size Mode**
+
    - Host specifies desired group size
    - Algorithm creates optimal distribution
    - Handles remainders intelligently:
