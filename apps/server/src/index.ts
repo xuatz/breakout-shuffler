@@ -20,6 +20,7 @@ const origin = [
   'https://client.breakout.local',
   'https://breakout-shuffler.xuatz.com',
   'https://breakout-shuffler.pages.dev',
+  '*.breakout-shuffler.pages.dev'
 ];
 
 // Create Redis client
