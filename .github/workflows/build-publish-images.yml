@@ -39,8 +39,6 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.CLIENT_IMAGE_NAME }}
           tags: |
             type=sha,prefix=,suffix=,format=short
-            type=raw,value=gexp-branch-{{branch}}
-            type=raw,value=gexp-baseref-{{base_ref}}
             type=raw,value=staging,enable=${{ github.ref == format('refs/heads/{0}', 'develop') }}
             type=raw,value=latest,enable={{is_default_branch}}
 
@@ -51,8 +49,6 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE_NAME }}
           tags: |
             type=sha,prefix=,suffix=,format=short
-            type=raw,value=gexp-branch-{{branch}}
-            type=raw,value=gexp-baseref-{{base_ref}}
             type=raw,value=staging,enable=${{ github.ref == format('refs/heads/{0}', 'develop') }}
             type=raw,value=latest,enable={{is_default_branch}}
 
