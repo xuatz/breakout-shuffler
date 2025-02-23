@@ -84,6 +84,10 @@ export class RoomRepository extends BaseRepository {
     return this.getSetMembers(`participants:${roomId}`);
   }
 
+  async removeParticipant(roomId: string, userId: string): Promise<void> {
+    await this.removeFromSet(`participants:${roomId}`, userId);
+  }
+
   async exists(roomId: string): Promise<boolean> {
     const room = await this.getRoom(roomId);
     return !!room;

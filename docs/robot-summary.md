@@ -255,25 +255,6 @@ host_nudges:{roomId} (hash)
 'getNudges': void
 ```
 
-## CI/CD Pipeline
-
-### Docker Configuration
-
-- Multi-stage builds for optimized image sizes
-- Production-ready configurations:
-  - Client: React application served via static files
-  - Server: Compiled TypeScript with Node.js runtime (port 9000)
-  - Only production dependencies included in final images
-  - Uses pnpm@10 for package management
-
-### GitHub Actions Workflow
-
-- Automated Docker image builds on push to main branch
-- Builds and pushes both client and server images to GitHub Container Registry (ghcr.io)
-- Uses efficient caching and multi-platform build support
-- Images tagged with commit SHA and latest tags
-- Images published under repository namespace (e.g., owner/repo/client, owner/repo/server)
-
 ## Group Allocation Feature
 
 The application includes a flexible group allocation system that allows hosts to organise participants in two ways:
@@ -295,10 +276,112 @@ The application includes a flexible group allocation system that allows hosts to
 
 The UI provides real-time preview of group distribution as participants join or leave the room.
 
+## Client Liveliness Feature
+
+### Health Check System
+
+1. **Client-Initiated Health Checks**
+
+   - Clients emit 'healthCheck' event every 30 seconds
+   - Server tracks last health check timestamp in Redis
+   - Health status reflected in UI through color-coded health bars
+
+2. **Host Controls**
+
+   - Nudge functionality: Creates popup on user's screen
+   - Kick functionality: Removes user from room (can rejoin)
+   - Visual health status in UserList component
+
+3. **Redis Data Structure Enhancement**
+
+```
+user:{userId} (hash additions)
+  - lastHealthCheck: string  // ISO timestamp
+  - health: number          // Current health points (0-100)
+```
+
+### Future Interactive Health System (Phase 2)
+
+1. **User Actions**
+
+   - Deal 2 damage to others
+   - Train to gain 1 HP
+   - Heal others for 2 HP
+
+2. **Stats Tracking**
+   - Track damage dealt
+   - Track healing provided
+   - Track training sessions
+   - Implementation details TBD for cross-session persistence
+
+## CI/CD Pipeline
+
+### Docker Configuration
+
+- Multi-stage builds for optimized image sizes
+- Production-ready configurations:
+  - Client: React application served via static files
+  - Server: Compiled TypeScript with Node.js runtime (port 9000)
+  - Only production dependencies included in final images
+  - Uses pnpm@10 for package management
+
+### GitHub Actions Workflow
+
+- Automated Docker image builds on push to main branch
+- Builds and pushes both client and server images to GitHub Container Registry (ghcr.io)
+- Uses efficient caching and multi-platform build support
+- Images tagged with commit SHA and latest tags
+- Images published under repository namespace (e.g., owner/repo/client, owner/repo/server)
+
+## Client Liveliness Feature
+
+### Health Check System
+
+1. **Client-Side Components**
+   - DisplayName component with visual liveliness indicator
+   - Smooth width-based health bar animation
+   - Color-coded status:
+     - Green (>70%): Active within 1 minute
+     - Yellow (50-70%): Active within 2 minutes
+     - Red (<50%): Inactive for >2 minutes
+
+2. **Server-Side Implementation**
+   - Automatic health check every 30 seconds
+   - Health data stored in Redis
+   - Real-time updates via Socket.IO
+   - Health calculation based on last check time
+
+3. **Host Controls**
+   - Click participant to show action modal
+   - Nudge functionality
+   - Kick functionality with ability to rejoin
+
+### Technical Implementation
+
+1. **Redis Data Structure**
+```
+user:{userId} (hash additions)
+  - health: number          // Current health points (0-100)
+  - lastHealthCheck: string // ISO timestamp
+```
+
+2. **Socket Events**
+```typescript
+// Client -> Server
+'healthCheck': void
+
+// Server -> Client
+'healthUpdate': {
+  userId: string;
+  health: number;
+  lastHealthCheck: string;
+}
+```
+
 ## Next Steps
 
-1. Implement proper error handling for edge cases
-2. Add participant disconnection cleanup
-3. Add room deletion when host disconnects
-4. Enhance UI/UX for room management
-5. Implement actual group assignment functionality
+1. Implement interactive health actions (damage/heal/train)
+2. Add stats tracking system
+3. Implement proper error handling for edge cases
+4. Add participant disconnection cleanup
+5. Add room deletion when host disconnects

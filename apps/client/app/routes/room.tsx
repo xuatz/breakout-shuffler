@@ -90,10 +90,15 @@ export default function Room() {
   useEffect(() => {
     const handleJoinedRoom = () => {
       setHasJoined(true);
+      sendSocketMessage('healthCheck');
     };
 
     const handleError = ({ message }: { message: string }) => {
       setError(message);
+    };
+
+    const handleKicked = () => {
+      window.location.href = '/';
     };
 
     const handleRoomStateUpdated = ({
@@ -115,11 +120,13 @@ export default function Room() {
     socket.on('joinedRoom', handleJoinedRoom);
     socket.on('error', handleError);
     socket.on('roomStateUpdated', handleRoomStateUpdated);
+    socket.on('kicked', handleKicked);
 
     return () => {
       socket.off('joinedRoom', handleJoinedRoom);
       socket.off('error', handleError);
       socket.off('roomStateUpdated', handleRoomStateUpdated);
+      socket.off('kicked', handleKicked);
     };
   }, [roomId, setActiveRoom]);
 

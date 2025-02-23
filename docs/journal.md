@@ -1,5 +1,26 @@
 # Development Journal
 
+## 20240224 - xz - feat(robot): add client liveliness tracking with visual feedback
+
+Added client liveliness tracking feature with the following components:
+
+1. Server-side changes:
+   - Enhanced UserRepository with liveliness tracking
+   - Simplified health check response in socket service
+   - Real-time liveliness updates for all participants
+
+2. Client-side changes:
+   - New DisplayName component with visual liveliness indicator
+   - Width-based health bar with smooth animations
+   - Color-coded status feedback (green/yellow/red)
+   - Layered design with background transitions
+
+3. Technical improvements:
+   - Automatic health checks every 30 seconds
+   - Smooth decay animation between health states
+   - Real-time updates for all room participants
+   - Host controls for participant management (nudge/kick)
+
 ## 20250219 - xz - feat: implement breakout room functionality
 
 ### Features Implemented
@@ -245,3 +266,4 @@
    - Add random name generation during client registration
    - Enable user self-rename functionality
    - Ensure persistence across server restarts
+

@@ -12,6 +12,11 @@ interface GroupAllocationRequest {
   distribution: number[]; // array of group sizes
 }
 
+interface KickUserRequest {
+  roomId: string;
+  targetUserId: string;
+}
+
 export class SocketService {
   private clientMap: Map<string, Socket>;
   private cookieService: CookieService;
@@ -46,6 +51,56 @@ export class SocketService {
           }
         }
         console.log(`Disconnected: ${socket.id}`);
+      });
+
+      // Health check events
+      socket.on('healthCheck', async () => {
+        try {
+          const userId = this.getUserId(socket);
+          const room = await this.roomService.getRoomByParticipant(userId);
+          if (!room) {
+            throw new Error('User is not in a room');
+          }
+
+          const healthInfo = await this.userRepository.updateHealth(userId);
+
+          this.io.to(room.id).emit('healthUpdate', {
+            ...healthInfo,
+            userId,
+          });
+        } catch (error) {
+          this.handleError(socket, 'Health check error', error);
+        }
+      });
+
+      socket.on('kickUser', async (request: KickUserRequest) => {
+        try {
+          const userId = this.getUserId(socket);
+          const room = await this.roomService.getRoom(request.roomId);
+
+          if (!room) {
+            throw new Error('Room not found');
+          }
+
+          if (room.hostId !== userId) {
+            throw new Error('Only the host can kick users');
+          }
+
+          await this.roomService.removeParticipant(request.roomId, request.targetUserId);
+          
+          // Notify the kicked user
+          const kickedUserSocket = this.clientMap.get(request.targetUserId);
+          if (kickedUserSocket) {
+            kickedUserSocket.emit('kicked', { roomId: request.roomId });
+            kickedUserSocket.leave(request.roomId);
+          }
+
+          // Update participant list for remaining users
+          const participants = await this.roomService.getParticipants(request.roomId);
+          this.io.to(request.roomId).emit('participantsUpdated', { participants });
+        } catch (error) {
+          this.handleError(socket, 'Kick user error', error);
+        }
       });
 
       // Room events
@@ -168,13 +223,22 @@ export class SocketService {
       // Debug events
       socket.on(
         'debugPing',
-        ({ pingerId, roomId }: { pingerId: string; roomId: string }) => {
-          try {
-            console.log(`Debug ping from ${pingerId} in room ${roomId}`);
-            socket.to(roomId).emit('debugPing', { pingerId, roomId });
-          } catch (error) {
-            this.handleError(socket, 'Debug ping error', error);
+        async ({ pingerId, roomId }: { pingerId: string; roomId: string }) => {
+          console.log(`Debug ping from ${pingerId} in room ${roomId}`);
+          socket.to(roomId).emit('debugPing', { pingerId, roomId });
+
+          const userId = this.getUserId(socket);
+          const healthInfo = await this.userRepository.updateHealth(userId);
+          const room = await this.roomService.getRoomByParticipant(userId)
+
+          if (!room) {
+            return;
           }
+
+          this.io.to(room.id).emit('healthUpdate', {
+            ...healthInfo,
+            userId,
+          });
         }
       );
 

@@ -155,20 +155,13 @@ app.get('/me/displayName', async (c) => {
   if (!userId) {
     throw new HTTPException(403, { message: 'Missing userId' });
   }
-
-  console.log('[GET /me/displayName] Request from userId:', userId);
+  
   const displayName = await userRepository.getDisplayName(userId);
-  console.log('[GET /me/displayName] Current displayName:', displayName);
 
   if (!displayName) {
     const newDisplayName = generateRandomName();
-    console.log(
-      '[GET /me/displayName] Generated new displayName:',
-      newDisplayName
-    );
     await userRepository.updateDisplayName(userId, newDisplayName);
     const savedName = await userRepository.getDisplayName(userId);
-    console.log('[GET /me/displayName] Verified saved displayName:', savedName);
     return c.json({ displayName: newDisplayName });
   }
 

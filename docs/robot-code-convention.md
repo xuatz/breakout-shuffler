@@ -66,6 +66,30 @@
   }, [dependencies]);
   ```
 
+### Health Check System
+- Client-side health check interval: 30 seconds
+- Health status colors:
+  - Green (>70%): bg-green-500 dark:bg-green-600
+  - Yellow (50-70%): bg-yellow-500 dark:bg-yellow-600
+  - Red (<50%): bg-red-500 dark:bg-red-600
+- Health bar component:
+  ```typescript
+  interface HealthBarProps {
+    health: number;
+    lastHealthCheck: string;
+  }
+  ```
+- Health check socket events:
+  - 'healthCheck': Client -> Server (no payload)
+  - 'healthUpdate': Server -> Client ({ userId, health, lastHealthCheck })
+
+### Host Controls
+- Click handlers in UserList for host actions
+- Host action modals follow Modal component pattern
+- Consistent action button styling:
+  - Nudge: bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700
+  - Kick: bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700
+
 ### Modal Components
 - Use a base Modal component for consistent styling and behavior
 - Implement click-outside behavior at the base Modal level

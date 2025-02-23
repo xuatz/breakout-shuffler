@@ -2,6 +2,8 @@ export interface User {
   id: string;
   displayName: string;
   joinedAt: Date;
+  health?: number;
+  lastHealthCheck?: string;
 }
 
 export interface Room {

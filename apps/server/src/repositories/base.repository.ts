@@ -58,4 +58,8 @@ export abstract class BaseRepository {
   protected async deleteKey(key: string): Promise<void> {
     await this.redis.del(key);
   }
+
+  protected async removeFromSet(key: string, member: string): Promise<void> {
+    await this.redis.srem(key, member);
+  }
 }

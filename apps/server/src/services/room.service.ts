@@ -158,4 +158,20 @@ export class RoomService {
     // For now, abort and end do the same thing
     return this.endBreakout(roomId);
   }
+
+  async removeParticipant(roomId: string, userId: string): Promise<void> {
+    const room = await this.roomRepository.getRoom(roomId);
+    if (!room) {
+      throw new Error('Room not found');
+    }
+
+    // Remove participant from room
+    await this.roomRepository.removeParticipant(roomId, userId);
+
+    // Remove room from user's rooms
+    const userRooms = await this.userRepository.getUserRooms(userId);
+    if (userRooms.includes(roomId)) {
+      await this.userRepository.removeUserFromRoom(userId, roomId);
+    }
+  }
 }
