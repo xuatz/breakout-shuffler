@@ -1,9 +1,9 @@
 client.breakout.local {
-    tls internal
+    tls /etc/caddy/cert.pem /etc/caddy/key.pem
     reverse_proxy client:3000
 }
 
 server.breakout.local {
-    tls internal
+    tls /etc/caddy/cert.pem /etc/caddy/key.pem
     reverse_proxy server:9000
 }

@@ -22,11 +22,16 @@ https://github.com/user-attachments/assets/f5aea545-46b0-435b-a3c4-45949166f40c
 
 ## Local Development
 
-Because this application shares the cookie between the client and server app, it is probably easier if you just the whole local dev environment with docker compose, with caddy (and redis) setup already.
+Because this application shares the cookie between the client and server app, it is probably easier if you just do the whole local dev environment with docker compose, with caddy (and redis) setup already.
 
 1. install docker
 2. docker compose up -d
 3. visit https://client.breakout.local
+
+### Trust self-signed tls cert with mkcert
+
+1. certs are in caddy
+2. https://github.com/FiloSottile/mkcert#installing-the-ca-on-other-systems
 
 ## Workspace Structure
 

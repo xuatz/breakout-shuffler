@@ -5,7 +5,9 @@ services:
       - "443:443"
       - "80:80"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/cert.pem:/etc/caddy/cert.pem
+      - ./caddy/key.pem:/etc/caddy/key.pem
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
