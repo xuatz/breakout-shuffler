@@ -1,5 +1,33 @@
 # Development Journal
 
+## 20250315 - xz - docs: reorganize project documentation
+
+### Changes Implemented
+1. Documentation Structure
+   - Extracted TODOs and ideas into dedicated `docs/todos.md`
+   - Updated `README.md` to focus on high-level roadmap
+   - Reorganized `robot-summary.md` to focus on current system state
+   - Added standardized template to `journal.md`
+   - Created new `docs/robot-instructions.md` for Cline guidance
+
+2. Content Organization
+   - Categorized tasks into short-term, roadmap-derived, and adhoc ideas
+   - Marked completed roadmap phases in README.md
+   - Preserved important domain knowledge in robot-summary.md
+   - Ensured consistent formatting across all documentation
+
+### Technical Improvements
+1. Documentation Maintenance
+   - Clear separation of concerns between documentation files
+   - Improved navigation with cross-references between files
+   - Standardized entry format for journal entries
+   - Added clear instructions for Cline in robot-instructions.md
+
+### Future Considerations
+- Consider adding documentation for architectural decisions
+- Review documentation periodically to ensure accuracy
+- Consider adding diagrams to visualize system architecture
+
 ## 20240224 - xz - feat(robot): add client liveliness tracking with visual feedback
 
 Added client liveliness tracking feature with the following components:
@@ -266,4 +294,3 @@ Added client liveliness tracking feature with the following components:
    - Add random name generation during client registration
    - Enable user self-rename functionality
    - Ensure persistence across server restarts
-
