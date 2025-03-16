@@ -3,11 +3,18 @@
 ## Bugs
 
 - [ ] when users reconnect, sometimes a page refresh is required before the room information shows up
+- [ ] (host) in a room, when the host refresh the page, the health/status bar of all participants is empty
+- [ ] (participant) in a room, when the host refresh the page, the health/status bar remains but turns grey
+- [ ] (participant) in a room, when the participant refresh the page, the health/status bar oh the host is empty
 
 ## Short-term Tasks
 - [ ] (host) nudge user feature
-- [ ] (user) UI feedback from getting kicked from host
+- [ ] (participant) UI feedback from getting kicked from host
 - [ ] hide "ping" button unless debug mode on
+- [x] Begin XState refactoring for room.tsx - implemented basic room joining flow
+- [ ] Continue XState refactoring:
+  - [ ] Refactor room state management (waiting vs active)
+  - [ ] Refactor socket event handling with XState
 
 ## Roadmap-derived Tasks
 ### Group Management

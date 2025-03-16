@@ -62,7 +62,16 @@ A real-time application that enables hosts to create rooms and participants to j
 
 ### Client-Side Components
 
-1. **Socket Context (`apps/client/app/context/socket.tsx`)**
+1. **State Management with XState**
+   - State machines for managing complex UI states
+   - Defined in `apps/client/app/machines/` directory
+   - Current machines:
+     - `roomMachine`: Manages room joining flow states
+       - States: idle, joining, waitingForSocket, joined, error
+       - Handles API calls with fromPromise
+       - Coordinates with Socket.IO events
+
+2. **Socket Context (`apps/client/app/context/socket.tsx`)**
    - Provides socket instance throughout the app
    - Ensures socket is always available (non-null)
    - Handles connection lifecycle
