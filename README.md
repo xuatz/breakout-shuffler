@@ -2,6 +2,8 @@
 
 ## MVP-20250220 Demo
 
+[Demo here](https://breakout-shuffler.xuatz.com/host)
+
 https://github.com/user-attachments/assets/f5aea545-46b0-435b-a3c4-45949166f40c
 
 ## Setup
