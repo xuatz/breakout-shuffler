@@ -62,14 +62,22 @@ A real-time application that enables hosts to create rooms and participants to j
 
 ### Client-Side Components
 
-1. **State Management with XState**
-   - State machines for managing complex UI states
-   - Defined in `apps/client/app/machines/` directory
-   - Current machines:
-     - `roomMachine`: Manages room joining flow states
-       - States: idle, joining, waitingForSocket, joined, error
-       - Handles API calls with fromPromise
-       - Coordinates with Socket.IO events
+1. **State Management**
+   - **XState Machines**
+     - State machines for managing complex UI states
+     - Defined in `apps/client/app/machines/` directory
+     - Current machines:
+       - `roomMachine`: Manages room state and interactions
+         - States: idle, joining, waitingForSocket, joined
+         - Handles API calls with fromPromise
+         - Manages room state (waiting/active)
+         - Tracks group assignments
+         - Coordinates all Socket.IO events
+         - Uses reenter flag for state resets
+   - **Jotai Atoms**
+     - Used for simpler global state (e.g., display names)
+     - Atoms with listeners for state requiring side effects
+     - Defined in `apps/client/app/atoms/` directory
 
 2. **Socket Context (`apps/client/app/context/socket.tsx`)**
    - Provides socket instance throughout the app

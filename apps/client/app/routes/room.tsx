@@ -5,7 +5,6 @@ import { useCookies } from 'react-cookie';
 import { useAtom } from 'jotai';
 import { useMachine } from '@xstate/react';
 import { displayNameAtom } from '~/atoms/displayName';
-import { activeRoomAtom, userGroupAtom } from '~/atoms/activeRoom';
 import { UserList } from '../components/UserList';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { sendSocketMessage, socket } from '~/lib/socket';
@@ -22,23 +21,20 @@ export default function Room() {
   const { roomId } = useParams();
   const [cookies] = useCookies(['_bsid']);
   const [displayName, setDisplayName] = useAtom(displayNameAtom);
-  const [activeRoom, setActiveRoom] = useAtom(activeRoomAtom);
-  const userGroup = useAtom(userGroupAtom)[0];
-  const [hasJoined, setHasJoined] = useState(false);
   const [error, setError] = useState('');
-  
+
   // Initialize the XState machine
   const [state, send] = useMachine(roomMachine);
-  
+
   // Handle form submission with the state machine
   const handleJoinRoom = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (roomId) {
       send({ type: 'JOIN', roomId });
     }
   };
-  
+
   // Legacy joinRoom function for the useEffect
   const joinRoom = async () => {
     if (roomId) {
@@ -84,19 +80,12 @@ export default function Room() {
   // Connect socket events to the state machine
   useEffect(() => {
     const handleJoinedRoom = () => {
-      // Update state machine when socket indicates we've joined the room
       send({ type: 'JOINED_ROOM' });
-      setHasJoined(true);
       sendSocketMessage('healthCheck');
     };
 
-    const handleError = ({ message }: { message: string }) => {
-      // Send error event to the state machine
-      send({ type: 'ERROR', message });
-      setError(message);
-    };
-
     const handleKicked = () => {
+      send({ type: 'KICKED' });
       window.location.href = '/';
     };
 
@@ -107,30 +96,22 @@ export default function Room() {
       state: 'waiting' | 'active';
       groups?: { [groupId: string]: string[] };
     }) => {
-      if (roomId) {
-        setActiveRoom({
-          roomId,
-          state,
-          groups,
-        });
-      }
+      send({ type: 'ROOM_STATE_UPDATED', state, groups });
     };
 
     socket.on('joinedRoom', handleJoinedRoom);
-    socket.on('error', handleError);
     socket.on('roomStateUpdated', handleRoomStateUpdated);
     socket.on('kicked', handleKicked);
 
     return () => {
       socket.off('joinedRoom', handleJoinedRoom);
-      socket.off('error', handleError);
       socket.off('roomStateUpdated', handleRoomStateUpdated);
       socket.off('kicked', handleKicked);
     };
-  }, [roomId, setActiveRoom, send]);
+  }, [roomId, send]);
 
   // Use XState machine state to determine what to render
-  
+
   // If no roomId is provided, show invalid room message
   if (!roomId) {
     return (
@@ -144,9 +125,9 @@ export default function Room() {
       </div>
     );
   }
-  
-  // If in error state, or idle state (not joined yet), show the join form
-  if (state.matches('error') || state.matches('idle')) {
+
+  // If in idle state (not joined yet), show the join form
+  if (state.matches('idle')) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center p-4">
         <h1 className="text-4xl font-bold mt-8 mb-6 text-gray-900 dark:text-white">
@@ -154,14 +135,12 @@ export default function Room() {
         </h1>
 
         <div className="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-gray-900">
-          {/* Show error message from the machine's context if in error state */}
-          {state.matches('error') && (
-            <div className="mb-4">
-              <ErrorMessage message={state.context.error || 'Error joining room'} />
-            </div>
-          )}
-
           <form onSubmit={handleJoinRoom} className="space-y-4">
+            {error && (
+              <div className="mb-4">
+                <ErrorMessage message={error} />
+              </div>
+            )}
             <div>
               <div className="flex justify-between items-center mb-1">
                 <label
@@ -190,14 +169,14 @@ export default function Room() {
               className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 
                         transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              {state.matches('error') ? 'Try Again' : 'Join Room'}
+              Join Room
             </button>
           </form>
         </div>
       </div>
     );
   }
-  
+
   // If in joining or waitingForSocket state, show loading indicator
   if (state.matches('joining') || state.matches('waitingForSocket')) {
     return (
@@ -207,17 +186,28 @@ export default function Room() {
         </h1>
         <div className="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-gray-900 flex justify-center">
           <div className="animate-pulse text-blue-500">
-            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            <svg
+              className="w-10 h-10"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              ></path>
             </svg>
           </div>
         </div>
       </div>
     );
   }
-  
-  // For joined state, or as fallback for hasJoined, show the room UI
-  if (state.matches('joined') || hasJoined) {
+
+  // For joined state, show the room UI
+  if (state.matches('joined')) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center p-4">
         <h1 className="text-4xl font-bold mt-8 mb-6 text-gray-900 dark:text-white">
@@ -225,10 +215,10 @@ export default function Room() {
         </h1>
 
         <div className="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-gray-900">
-          {activeRoom?.state === 'active' && userGroup && (
+          {state.context.roomState === 'active' && state.context.userGroup && (
             <div className="mb-6 p-4 bg-blue-100 dark:bg-blue-900 rounded-lg">
               <p className="text-lg font-semibold text-blue-800 dark:text-blue-100">
-                You are in Group {userGroup}
+                You are in Group {state.context.userGroup}
               </p>
             </div>
           )}
@@ -237,7 +227,7 @@ export default function Room() {
       </div>
     );
   }
-  
+
   // Fallback UI (should not reach here)
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center p-4">

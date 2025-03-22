@@ -21,28 +21,42 @@ export const joinRoomLogic = fromPromise(async ({ input }: { input: { roomId: st
 });
 
 // Create the machine
+export type RoomState = 'waiting' | 'active';
+
+interface GroupAssignment {
+  [groupId: string]: string[];
+}
+
 export const roomMachine = setup({
   types: {
     context: {} as {
       roomId: string | undefined;
       error: string | undefined;
+      roomState: RoomState | undefined;
+      groups: GroupAssignment | undefined;
+      userGroup: string | undefined;
     },
     events: {} as 
       | { type: 'JOIN'; roomId: string }
       | { type: 'RETRY' }
       | { type: 'JOINED_ROOM' }
-      | { type: 'ERROR'; message: string },
+      | { type: 'ERROR'; message: string }
+      | { type: 'ROOM_STATE_UPDATED'; state: RoomState; groups?: GroupAssignment }
+      | { type: 'KICKED' },
   },
   actors: {
     joinRoomLogic,
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QCcD2qC2A6AlhANmAMQBSA8gJIByA2gAwC6ioADqrDgC46oB2zIAB6IAjACYAbFjoyZAZhEAOEQHYZqgDQgAnqLoisEsQFY6YlcYAsx44uMmAvg61pMWAFaocvb1CIQ+MFxeADdUAGsg12xPb18EbzCAYwBDbj56BkyBNg50-iQhREsVSywlC1U6CTo5AE4RSzktXQR6uuk6iTkVMTrLOmMROksnF3QYrx9ePzBkNGQsFnw0gDNUZGxojyn4xNRU-MzswtyuHgLQYQQSsoqhtRr6xuadRDFJLBKJYxUJRToijEtQkYxA2wA7ilzjMAGIbADKB0inFIlCoAFEACIAfQASmQyABZE6sdjnPgCa52MrGBR9Jo1CQSFQqFrFCRlAZGCR1FRKSw-ORgyHQ7hwxHIsCojF4gl40kgM75KmIGlYOnifpyJkstlvNr-L6aprWcyWRoiiZYOYLIh4jEAFTxAE1FcqLqqEA07tz-h9BcoJOyEMoNbJVBV9BYnM4QLxUBA4AJojlySrCtcALTBg05q1uPCENN5T2Z4piEPiMp2ES-EQKRRySzAxQFyZxGYlimXIoIMQ9Qx0OpyAHmKx1YH61rDAxyIbGXldBsiSPtrBQmFQeHIJFJFHdjNXRAsuRYFTNga-D7qXOteqKTrdP5mpRGdexXiQQ9l48IYYmFgQLKL0PwfKOlYGoKZ4-EYiinsoTZiOutobD+lLlv+ZjGEBYggZI9gDkCIYmHQ561I0QL2BIdZ-LGDhAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QCcD2qC2A6AlhANmAMQBSA8gJIByA2gAwC6ioADqrDgC46oB2zIAB6IAjACYAbFjoyZAZhEAOEQHYZqgDQgAnqLoisEsQFY6YlcYAsx44uMmAvg61pMWAFaocvb1CIQ+MFxeADdUAGsg12xPb18EbzCAYwBDbj56BkyBNg50-iQhRDkATmMsSzk5S2USkrExOkVzLV0EBrksETpjOVMVaqULFScXdGwAdxSuXwAxVGQAZVQkyM5SSioAUQARAH0AJTIyAFlswtyZvgFhBEs6EqwrMWbjEroVd8tv1sRLCToWAUigkyhUihKoOMI2cIGiHi8vEgRCOpz2iwAKgBBDFbPYAVQACjscbtzqx2FcCqBbiJ7oYVJZGZVlCIqr8EHI6J0VLzLCUFCVPipQaM4eMEd5kQBpCgAYWlZMYOUp+RuiHMQLEgxEVjpPSMHLE9UM9VsFhKiksIgkIicsN4qAgcAE0RVeR41KKCAAtI0GRJbFbbG8WRy6RUAQLunIAR9emL4XhCO6qeq7mJw2JLFg7LqVGylNVGopExLYj5eFBU2rCrc5MosGorRI1JV3qDw-onlZQX1jGyhc0y24pjMq-Mlis1jXPen7mJpHY6N9GtUJALjBy5JIsMajNqISCFNmRzFEZBZ9c68Uc6CLDubMMQRIOf9ASJxNbsy9WzZjPaDhAA */
   id: 'room',
   initial: 'idle',
   context: {
     roomId: undefined,
     error: undefined,
+    roomState: undefined,
+    groups: undefined,
+    userGroup: undefined,
   },
   states: {
     idle: {
@@ -64,44 +78,39 @@ export const roomMachine = setup({
         }),
         onDone: {
           target: 'waitingForSocket',
-        },
-        onError: {
-          target: 'error',
-          actions: assign({
-            error: ({ event }) => {
-              // Handle the unknown error type safely
-              const errorMessage = event.error instanceof Error 
-                ? event.error.message 
-                : String(event.error);
-              return errorMessage;
-            },
-          }),
-        },
+        }
       },
     },
     waitingForSocket: {
       on: {
-        JOINED_ROOM: 'joined',
-        ERROR: {
-          target: 'error',
-          actions: assign({
-            error: ({ event }) => event.message,
-          }),
-        },
+        JOINED_ROOM: 'joined'
       },
     },
     joined: {
-      type: 'final',
-    },
-    error: {
       on: {
-        RETRY: {
-          target: 'joining',
+        ROOM_STATE_UPDATED: {
           actions: assign({
-            error: (_) => undefined,
-          }),
+            roomState: ({ event }) => event.state,
+            groups: ({ event }) => event.groups,
+            // Update userGroup if groups are provided and user is in a group
+            userGroup: ({ context, event }) => {
+              if (!event.groups || !context.roomId) return undefined;
+              
+              // Find which group the user is in
+              for (const [groupId, users] of Object.entries(event.groups)) {
+                if (users.includes(context.roomId)) {
+                  return groupId;
+                }
+              }
+              return undefined;
+            }
+          })
         },
-      },
-    },
+        KICKED: {
+          target: "idle",
+          reenter: true
+        }
+      }
+    }
   },
 });

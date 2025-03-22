@@ -11,6 +11,9 @@
 ## Short-term Tasks
 - [ ] (host) nudge user feature
 - [ ] (participant) UI feedback from getting kicked from host
+- [ ] (host) improve group size selection
+  * when host try to change numbers, because it does not allow value below 1, to change it from 1 to 4, you have either type 14 and then delete the 1
+    or 41 and then delete the 1
 - [x] hide "ping" button unless debug mode on
 - [x] Begin XState refactoring for room.tsx - implemented basic room joining flow
 - [ ] Continue XState refactoring:
@@ -37,4 +40,6 @@
 - [ ] Need to think about how the application should handle new participants joining during an active room session
 - [ ] room ids can be shorter (maybe 10 char long?)
 - [ ] add UI feedback for participants when clicking on buttons such as `Nudge Host`
-- [ ] increase button sizes on mobile view
+- [ ] improve mobile media query layout UX
+  - [ ] increase button sizes on mobile view
+  - [ ] start taking a mobile first approach, since it will mainly be used in mobile web
