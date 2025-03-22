@@ -17,7 +17,7 @@ export function UserList({
   isHost = false,
 }: UserListProps) {
   const [users, setUsers] = useState<User[]>([]);
-  const [cookies] = useCookies(['_bsid']);
+  const [cookies] = useCookies(['_bsid', '_debug']);
   const userId = cookies._bsid;
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -108,14 +108,16 @@ export function UserList({
     <div className="w-full bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4 relative">
       <h3 className="flex text-lg font-semibold text-gray-800 dark:text-white mb-3 gap-x-2">
         {title} ({users?.length || 0})
-        <button
-          onClick={() => {
-            sendSocketMessage('debugPing', { pingerId: userId, roomId });
-          }}
-          className="px-2 py-1 text-sm bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded transition-colors duration-200"
-        >
-          Ping
-        </button>
+        {cookies._debug && (
+          <button
+            onClick={() => {
+              sendSocketMessage('debugPing', { pingerId: userId, roomId });
+            }}
+            className="px-2 py-1 text-sm bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded transition-colors duration-200"
+          >
+            Ping
+          </button>
+        )}
         {!isHost && (
           <button
             onClick={() => {
