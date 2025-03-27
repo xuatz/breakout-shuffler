@@ -16,9 +16,9 @@
     or 41 and then delete the 1
 - [x] hide "ping" button unless debug mode on
 - [x] Begin XState refactoring for room.tsx - implemented basic room joining flow
-- [ ] Continue XState refactoring:
-  - [ ] Refactor room state management (waiting vs active)
-  - [ ] Refactor socket event handling with XState
+- [x] Continue XState refactoring:
+  - [x] Refactor room state management (waiting vs active)
+  - [x] Refactor socket event handling with XState
 
 ## Roadmap-derived Tasks
 ### Group Management

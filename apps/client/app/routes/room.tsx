@@ -8,7 +8,7 @@ import { displayNameAtom } from '~/atoms/displayName';
 import { UserList } from '../components/UserList';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { sendSocketMessage, socket } from '~/lib/socket';
-import { roomMachine } from '~/machines/roomMachine';
+import { roomMachine, type MachineState } from '~/machines/roomMachine';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -35,53 +35,18 @@ export default function Room() {
     }
   };
 
-  // Legacy joinRoom function for the useEffect
-  const joinRoom = async () => {
-    if (roomId) {
-      send({ type: 'JOIN', roomId });
+  // Check if user is already in room
+  useEffect(() => {
+    if (cookies._bsid && roomId) {
+      send({ type: 'CHECK_ROOM', roomId });
     }
-  };
-
-  useEffect(
-    function restoreUserRoom() {
-      const fetchUserRoom = async () => {
-        try {
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/rooms/${roomId}/me`,
-            {
-              method: 'POST',
-              credentials: 'include',
-            }
-          );
-
-          if (response.status === 200) {
-            const { isParticipant } = await response.json();
-
-            if (isParticipant) {
-              await joinRoom();
-            }
-          }
-        } catch (error) {
-          setError(
-            error instanceof Error
-              ? error.message
-              : 'Failed to restore room session'
-          );
-        }
-      };
-
-      if (cookies._bsid && roomId) {
-        fetchUserRoom();
-      }
-    },
-    [cookies._bsid, roomId]
-  );
+  }, [cookies._bsid, roomId, send]);
 
   // Connect socket events to the state machine
   useEffect(() => {
     const handleJoinedRoom = () => {
       send({ type: 'JOINED_ROOM' });
-      sendSocketMessage('healthCheck');
+      // sendSocketMessage('healthCheck');
     };
 
     const handleKicked = () => {
@@ -215,7 +180,7 @@ export default function Room() {
         </h1>
 
         <div className="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-gray-900">
-          {state.context.roomState === 'active' && state.context.userGroup && (
+          {state.matches({ joined: 'active' }) && state.context.userGroup && (
             <div className="mb-6 p-4 bg-blue-100 dark:bg-blue-900 rounded-lg">
               <p className="text-lg font-semibold text-blue-800 dark:text-blue-100">
                 You are in Group {state.context.userGroup}

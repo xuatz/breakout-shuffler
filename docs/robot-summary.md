@@ -68,12 +68,25 @@ A real-time application that enables hosts to create rooms and participants to j
      - Defined in `apps/client/app/machines/` directory
      - Current machines:
        - `roomMachine`: Manages room state and interactions
-         - States: idle, joining, waitingForSocket, joined
-         - Handles API calls with fromPromise
-         - Manages room state (waiting/active)
-         - Tracks group assignments
-         - Coordinates all Socket.IO events
-         - Uses reenter flag for state resets
+         - States:
+           - idle: Initial state, shows join form
+           - checking: Validates if user is already in room
+           - joining: Handles room join API call
+           - waitingForSocket: Establishes socket connection
+           - joined: Manages room participation
+             - waiting: Default state, configuring groups
+             - active: Breakout session in progress
+         - Features:
+           - Room restoration with CHECK_ROOM event
+           - Automatic health checks on socket connection
+           - Group assignment tracking
+           - Breakout session controls (start/end/abort)
+         - Technical details:
+           - Uses fromPromise for API calls
+           - Nested state machines for complex flows
+           - Automatic state transitions based on room updates
+           - Type-safe event handling
+           - Proper error management
    - **Jotai Atoms**
      - Used for simpler global state (e.g., display names)
      - Atoms with listeners for state requiring side effects
