@@ -12,6 +12,7 @@ export interface Room {
 export interface User {
   id: string;
   displayName?: string;
+  lastLivelinessUpdateAt?: string;
 }
 
 export class RoomService {
@@ -62,6 +63,7 @@ export class RoomService {
     await Promise.all([
       this.roomRepository.addParticipant(roomId, userId),
       this.userRepository.addUserToRoom(userId, roomId),
+      this.userRepository.updateLiveliness(userId),
     ]);
 
     return true;
@@ -76,6 +78,7 @@ export class RoomService {
         return {
           id,
           displayName: userData?.displayName,
+          lastLivelinessUpdateAt: userData?.lastLivelinessUpdateAt,
         };
       })
     );

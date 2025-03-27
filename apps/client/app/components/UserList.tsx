@@ -22,11 +22,33 @@ export function UserList({
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Set up health check interval
+  // Set up liveliness update interval
   useEffect(() => {
     const interval = setInterval(() => {
-      sendSocketMessage('healthCheck');
-    }, 30000); // Every 30 seconds
+      if (!isHost) {
+        sendSocketMessage('updateLiveliness');
+      }
+    }, 10000); // Every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (isHost) {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/rooms/${roomId}/participants`,
+          {
+            credentials: 'include',
+          }
+        );
+
+        if (response.ok) {
+          const { participants } = await response.json();
+          setUsers(participants);
+        }
+      }
+    }, 5000); // Every 5 seconds
 
     return () => clearInterval(interval);
   }, []);
@@ -41,25 +63,7 @@ export function UserList({
     };
 
     const handleHostNudged = () => {
-      console.log('xz:host nudged');
-    };
-
-    const handleHealthUpdate = ({
-      userId: updatedUserId,
-      health,
-      lastHealthCheck,
-    }: {
-      userId: string;
-      health: number;
-      lastHealthCheck: string;
-    }) => {
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === updatedUserId
-            ? { ...user, health, lastHealthCheck }
-            : user
-        )
-      );
+      console.log('xz:host nudged'); // Keep this for now, might be useful later
     };
 
     const handleKicked = ({ roomId: kickedRoomId }: { roomId: string }) => {
@@ -70,13 +74,11 @@ export function UserList({
 
     socket.on('participantsUpdated', handleParticipantsUpdated);
     socket.on('hostNudged', handleHostNudged);
-    socket.on('healthUpdate', handleHealthUpdate);
     socket.on('kicked', handleKicked);
 
     return () => {
       socket.off('participantsUpdated', handleParticipantsUpdated);
       socket.off('hostNudged', handleHostNudged);
-      socket.off('healthUpdate', handleHealthUpdate);
       socket.off('kicked', handleKicked);
     };
   }, [roomId]);
@@ -91,7 +93,7 @@ export function UserList({
   const handleNudgeUser = () => {
     if (selectedUser) {
       console.log('Nudging user:', selectedUser.id);
-      console.log('TOOD: Implement nudge user socket event')
+      console.log('TOOD: Implement nudge user socket event');
     }
   };
 
@@ -140,7 +142,7 @@ export function UserList({
             }`}
             onClick={() => handleUserClick(user)}
           >
-            <DisplayName user={user} />
+            <DisplayName user={user} isHost={isHost} />
           </li>
         ))}
       </ol>

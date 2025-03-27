@@ -13,7 +13,7 @@ export const roomMachine = setup({
     checkRoomActor,
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QCcD2qC2A6AlhANmAMQBSA8gJIByA2gAwC6ioADqrDgC46oB2zIAB6IAjACYAbFjoyZAZhEAOEQHYZqgDQgAnqLoisEsQFY6YlcYAsx44uMmAvg61pMWAFaocvb1CIQ+MFxeADdUAGsg12xPb18EbzCAYwBDbj56BkyBNg50-iQhRDkATmMsSzk5S2USkrExOkVzLV0EBrksETpjOVMVaqULFScXdGwAdxSuXwAxVGQAZVQkyM5SSioAUQARAH0AJTIyAFlswtyZvgFhBEs6EqwrMWbjEroVd8tv1sRLCToWAUigkyhUihKoOMI2cIGiHi8vEgRCOpz2iwAKgBBDFbPYAVQACjscbtzqx2FcCqBbiJ7oYVJZGZVlCIqr8EHI6J0VLzLCUFCVPipQaM4eMEd5kQBpCgAYWlZMYOUp+RuiHMQLEgxEVjpPSMHLE9UM9VsFhKiksIgkIicsN4qAgcAE0RVeR41KKCAAtI0GRJbFbbG8WRy6RUAQLunIAR9emL4XhCO6qeq7mJw2JLFg7LqVGylNVGopExLYj5eFBU2rCrc5MosGorRI1JV3qDw-onlZQX1jGyhc0y24pjMq-Mlis1jXPen7mJpHY6N9GtUJALjBy5JIsMajNqISCFNmRzFEZBZ9c68Uc6CLDubMMQRIOf9ASJxNbsy9WzZjPaDhAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QCcD2qC2A6AlhANmAMQBSA8gJIByA2gAwC6ioADqrDgC46oB2zIAB6IAjHQCc4rOIBMIgOziRAZjrzlygKwAOADQgAnogAsGrCIBsdHcfGnNMi8YC+z-Wky4CxAMIAJAFEfAGkAfQAlMjIAWXomJBA2Dm4+AWEEMW0pWQUlVXUtPUNEC3ELLBllbXk6a2VjYwsZcVd3dGwAYwALMA6AaxxeKCIIPjBcXgA3VD7xj06e-sGoBEHpjoBDFN44uIEkrh5+BPSm-SMMzXltLGqRY0VjayuRVpB5rG7egaGRsYnprMsB8vkshqspqhNttdiJ4qx2IdUidRBJsnJFCo1BodOcSsYbupqrVNMYZGodG8QYsfsMwMg0MgsCx8FsAGaoZDYanfZYQ9ZbI67Rj7RHbNKoyTSDF5bGFPEITRKrDXJWSTTPTTiTRU9pYABWqEGyz+vHGaxmcz1huN4It0KFjD2CQO4pRCBkMnkKrK2h01yqDzoygVYmDWGMIm0ygD8gs8euus8Nt4JvpjOZrM4HK5wOtRtTdshDr4wvhiTFRwlCHkMlDzWM0ijMejpWsBKT2AA7htDkMAGKcgDKUNmnFIlCoAQAIhEorERS7K8jQOlPd7FBY-dVo9ogyHiggLGYCdot01FPIHNpO1ge32oIPkCP+mBxwFwpFws6Eckq+71x9Ld-V3fcFWjTQVREBwyWgpwrhkW8U0gIhIhiUIhwAFQAQUwgJQgAVQABWnXCZx-Cs-xXIREHkWsVQsJURBkPclB0EQFS9ZQI0cGQlWMa9lBEFQkILFDAmwgAZTC-EIkiyIo11-1XWjxEJMorzJUkrm0IoLgUb0HiEkRZGUJwvVEwYUI-L9FOXY4VIQVssCcOgCWuGRTDoZjwJELAHFqOg+PqT0zJaNx3nzKyICIYIKBCcjF1-JEHJopztBkLB6jMjKz2PGwFU0UoGLkBwtQE0pLLNCA717bhfiw7Dwkw0IACFwgCbDgjIAjMLsqjUvSbSeKjaCdGUJQWIVIMsuUTzN1rPigosKrICwDYOm4SZiACKhZ3azrut6-qUurUlMs8yQ6JjNT+IVeMLqqCx5CeAk+M0V4Io+ZCao2rbiGw1qyGatqOq6nq+qSyjTvdc6KlscRrsUP1SUK+MKj9CxoN0s9SWUVwIt4VAIDgAR5lFAbqwAWgsBUqcgtTAqZpmo1vPBCApmHHLDOhpSjIzxFqOaOMPK5vQ+0qTI+3TmNvUFaU5t1udMG4dOeRo1SVQq4xcmNoNUD7az3KrlkV5S0pjTKEdkJptEsDKRf0ubececQhNUMpIx1L69XverH2HUc3zN6j0jJcCY2kSM7ePckCTUVaIBDwbECqPyJEtsonGEnzDyqTLo0usQty0AzE9qh9k+rF7ILEWQjbUKwptF2QsG8uQuIyoSXvLv6cG2qv3TJKQM9rLPI2EutRe86R6mDLJqiqMyCecIA */
   id: 'room',
   initial: 'idle',
   context: {
@@ -22,8 +22,6 @@ export const roomMachine = setup({
     roomState: undefined,
     groups: undefined,
     userGroup: undefined,
-    health: undefined,
-    lastHealthCheck: undefined,
   },
   states: {
     idle: {
@@ -85,7 +83,6 @@ export const roomMachine = setup({
       },
     },
     waitingForSocket: {
-      entry: () => sendSocketMessage('healthCheck'),
       on: {
         JOINED_ROOM: 'joined',
         ERROR: {
@@ -148,12 +145,6 @@ export const roomMachine = setup({
               }
             },
           ],
-        },
-        HEALTH_UPDATE: {
-          actions: assign({
-            health: ({ event }) => event.health,
-            lastHealthCheck: ({ event }) => event.lastHealthCheck,
-          }),
         },
         ERROR: {
           actions: assign({

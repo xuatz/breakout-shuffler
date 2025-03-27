@@ -53,26 +53,6 @@ export class SocketService {
         console.log(`Disconnected: ${socket.id}`);
       });
 
-      // Health check events
-      socket.on('healthCheck', async () => {
-        try {
-          const userId = this.getUserId(socket);
-          const room = await this.roomService.getRoomByParticipant(userId);
-          if (!room) {
-            throw new Error('User is not in a room');
-          }
-
-          const healthInfo = await this.userRepository.updateHealth(userId);
-
-          this.io.to(room.id).emit('healthUpdate', {
-            ...healthInfo,
-            userId,
-          });
-        } catch (error) {
-          this.handleError(socket, 'Health check error', error);
-        }
-      });
-
       socket.on('kickUser', async (request: KickUserRequest) => {
         try {
           const userId = this.getUserId(socket);
@@ -228,17 +208,11 @@ export class SocketService {
           socket.to(roomId).emit('debugPing', { pingerId, roomId });
 
           const userId = this.getUserId(socket);
-          const healthInfo = await this.userRepository.updateHealth(userId);
           const room = await this.roomService.getRoomByParticipant(userId)
 
           if (!room) {
             return;
           }
-
-          this.io.to(room.id).emit('healthUpdate', {
-            ...healthInfo,
-            userId,
-          });
         }
       );
 
@@ -327,6 +301,16 @@ export class SocketService {
           socket.emit('hostNudged', { nudges });
         } catch (error) {
           this.handleError(socket, 'Get nudges error', error);
+        }
+      });
+
+      // Liveliness events
+      socket.on('updateLiveliness', async () => {
+        try {
+          const userId = this.getUserId(socket);
+          await this.userRepository.updateLiveliness(userId);
+        } catch (error) {
+          this.handleError(socket, 'Update liveliness error', error);
         }
       });
     });

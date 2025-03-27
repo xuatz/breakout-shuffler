@@ -8,7 +8,7 @@ import { displayNameAtom } from '~/atoms/displayName';
 import { UserList } from '../components/UserList';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { sendSocketMessage, socket } from '~/lib/socket';
-import { roomMachine, type MachineState } from '~/machines/roomMachine';
+import { roomMachine } from '~/machines/roomMachine';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -46,7 +46,6 @@ export default function Room() {
   useEffect(() => {
     const handleJoinedRoom = () => {
       send({ type: 'JOINED_ROOM' });
-      // sendSocketMessage('healthCheck');
     };
 
     const handleKicked = () => {

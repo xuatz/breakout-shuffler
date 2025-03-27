@@ -18,8 +18,6 @@ export type RoomContext = {
   roomState: RoomState | undefined;
   groups: GroupAssignment | undefined;
   userGroup: string | undefined;
-  health: number | undefined;
-  lastHealthCheck: string | undefined;
 };
 
 export type RoomEvent =
@@ -29,7 +27,6 @@ export type RoomEvent =
   | { type: 'JOINED_ROOM' }
   | { type: 'ERROR'; message: string }
   | { type: 'ROOM_STATE_UPDATED'; state: RoomState; groups?: GroupAssignment }
-  | { type: 'HEALTH_UPDATE'; health: number; lastHealthCheck: string }
   | { type: 'START_BREAKOUT' }
   | { type: 'END_BREAKOUT' }
   | { type: 'ABORT_BREAKOUT' }

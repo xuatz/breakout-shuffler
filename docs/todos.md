@@ -9,6 +9,8 @@
 - [ ] (participant) in a room, when the participant refresh the page, the health/status bar of the host is empty
 
 ## Short-term Tasks
+- [ ] add oxlint
+- [ ] auto prettier on staged
 - [ ] (host) nudge user feature
 - [ ] (participant) UI feedback from getting kicked from host
 - [ ] (host) improve group size selection

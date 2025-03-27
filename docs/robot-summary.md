@@ -31,7 +31,7 @@ A real-time application that enables hosts to create rooms and participants to j
        - Display name management
        - User-room relationships
        - User info retrieval
-       - Liveliness tracking
+       - Liveliness tracking (`lastLivelinessUpdateAt` field, `updateLiveliness`, `getLiveliness` methods)
 
    - **Nudge Repository (`apps/server/src/repositories/nudge.repository.ts`)**
      - Handles nudge functionality persistence
@@ -56,9 +56,10 @@ A real-time application that enables hosts to create rooms and participants to j
      - Key events:
        - `joinRoom` - handles participant joining
        - `createRoom` - handles room creation
-       - `participantsUpdated` - broadcasts participant list updates
+       - `participantsUpdated` - broadcasts participant list updates (now includes liveliness data)
        - `nudgeHost` - manages host notifications
-       - `healthCheck` - manages client liveliness
+       - `updateLiveliness` - handles client liveliness pings (sent by non-host participants)
+       - `livelinessUpdated` - (Removed, host now polls via HTTP)
 
 ### Client-Side Components
 
@@ -78,7 +79,6 @@ A real-time application that enables hosts to create rooms and participants to j
              - active: Breakout session in progress
          - Features:
            - Room restoration with CHECK_ROOM event
-           - Automatic health checks on socket connection
            - Group assignment tracking
            - Breakout session controls (start/end/abort)
          - Technical details:
@@ -97,7 +97,7 @@ A real-time application that enables hosts to create rooms and participants to j
    - Ensures socket is always available (non-null)
    - Handles connection lifecycle
 
-2. **Cookie Management**
+3. **Cookie Management**
    - Uses react-cookie for user identification
    - Key cookies:
      - `_bsid`: Breakout Shuffler ID cookie
@@ -106,7 +106,7 @@ A real-time application that enables hosts to create rooms and participants to j
      - Secure: Enabled in production
      - Path: '/'
 
-3. **Display Name Management**
+4. **Display Name Management**
    - Display names stored in Redis using UserRepository
    - HTTP endpoints for display name operations:
      - GET /me/displayName: Fetches user's display name, generates if not exists
@@ -118,14 +118,28 @@ A real-time application that enables hosts to create rooms and participants to j
    - Display names persisted across sessions
    - Automatic random name generation for new users
 
-4. **Room Component (`apps/client/app/routes/room.tsx`)**
+5. **Room Component (`apps/client/app/routes/room.tsx`)**
    - Handles room joining flow
    - Manages room state and participant interactions
 
-5. **UserList Component (`apps/client/app/components/UserList.tsx`)**
-   - Displays room participants
-   - Updates in real-time via socket events
-   - Shows current user with "(you)" indicator
+6. **LivelinessIndicator Component (`apps/client/app/components/LivelinessIndicator.tsx`)**
+   - Displays a colored circle indicating user liveliness based on `lastLivelinessUpdateAt`.
+   - Color codes: Green (<10s), Yellow (<30s), Orange (<1m), Red (<2m), Black (>=2m or unknown).
+
+7. **DisplayName Component (`apps/client/app/components/DisplayName.tsx`)**
+   - Integrates the `LivelinessIndicator` component to show user status.
+   - Takes an `isHost` prop to conditionally display the indicator (only for host view, excluding self).
+   - Uses `tailwind-merge` for dynamic class management.
+   - Enhanced current user identification with "this is you!" text.
+   - Removed legacy health tracking system.
+
+8. **UserList Component (`apps/client/app/components/UserList.tsx`)**
+   - Displays room participants, including liveliness status via `DisplayName`.
+   - **Non-Hosts:** Send `updateLiveliness` event every 10 seconds.
+   - **Hosts:** Poll `GET /rooms/:id/participants` endpoint every 5 seconds to update participant list and liveliness status.
+   - Updates participant list via `participantsUpdated` socket event (e.g., on join/leave).
+   - Passes `isHost` prop to `DisplayName`.
+   - Shows current user with "(you)" indicator.
    - Debug features:
      - Debug Mode: Toggleable via cookie in the top bar menu
      - Ping: Test connection with other participants
@@ -134,7 +148,7 @@ A real-time application that enables hosts to create rooms and participants to j
        - Host-only controls to add 1 or 10 dummy participants for testing
        - Dummy participants get random names with "(dummy)" suffix
 
-6. **TopBar Component (`apps/client/app/components/TopBar.tsx`)**
+9. **TopBar Component (`apps/client/app/components/TopBar.tsx`)**
    - Sticky top bar with user icon and dropdown menu
    - Shows first letter of user's display name
    - Features:
@@ -158,8 +172,23 @@ A real-time application that enables hosts to create rooms and participants to j
 ### Room Joining Flow
 1. Participant makes HTTP POST request to join room
 2. Server validates room and adds participant
-3. Socket connection established for real-time updates
-4. Participant list broadcast to all room members
+3. Server updates participant's initial liveliness timestamp (`updateLiveliness`)
+4. Socket connection established for real-time updates
+5. Participant list broadcast to all room members
+
+### HTTP Endpoints
+1. **Room Management**
+   - `GET /rooms` - List all rooms
+   - `POST /rooms` - Create a new room
+   - `GET /rooms/:id` - Get room details
+   - `GET /rooms/:id/participants` - Get list of room participants with liveliness data
+   - `POST /rooms/:id/join` - Join a room
+   - `POST /rooms/:id/me` - Check if current user is in room
+
+2. **User Management**
+   - `GET /me/displayName` - Get current user's display name
+   - `POST /me/displayName` - Update current user's display name
+   - `GET /host` - Get host's current room
 
 ### Group System
 
@@ -190,37 +219,10 @@ A real-time application that enables hosts to create rooms and participants to j
    - State persists across page reloads
    - Simple, clear group assignment display
 
-### Health System
-
-1. **Client-Side Components**
-   - DisplayName component with visual liveliness indicator
-   - Smooth width-based health bar animation
-   - Color-coded status:
-     - Green (>70%): Active within 1 minute
-     - Yellow (50-70%): Active within 2 minutes
-     - Red (<50%): Inactive for >2 minutes
-
-2. **Server-Side Implementation**
-   - Automatic health check every 30 seconds
-   - Health data stored in Redis
-   - Real-time updates via Socket.IO
-   - Health calculation based on last check time
-
-3. **Host Controls**
+### Host Controls
    - Click participant to show action modal
    - Nudge functionality: Creates popup on user's screen
    - Kick functionality: Removes user from room (can rejoin)
-
-4. **Planned Interactive Health System**
-   - User actions (planned):
-     - Deal 2 damage to others
-     - Train to gain 1 HP
-     - Heal others for 2 HP
-   - Stats tracking (planned):
-     - Track damage dealt
-     - Track healing provided
-     - Track training sessions
-     - Cross-session persistence
 
 ## Technical Details
 
@@ -242,8 +244,7 @@ user_rooms:{userId} (set)
 
 user:{userId} (hash)
   - displayName: string
-  - lastHealthCheck: string  // ISO timestamp
-  - health: number          // Current health points (0-100)
+  - lastLivelinessUpdateAt: string (ISO 8601 timestamp)
 
 host_nudges:{roomId} (hash)
   - userId -> {
@@ -261,7 +262,7 @@ host_nudges:{roomId} (hash)
 'participantsUpdated': { participants: User[] }
 'error': { message: string }
 'hostNudged': { nudges: NudgeData[] }
-'healthUpdate': { userId: string, health: number, lastHealthCheck: string }
+ 'livelinessUpdated': { userId: string, lastLivelinessUpdateAt: string } // (Removed)
 
 // Client -> Server
 'joinRoom': { roomId: string, displayName: string }
@@ -271,8 +272,8 @@ host_nudges:{roomId} (hash)
 'nudgeHost': void
 'clearNudges': void
 'getNudges': void
-'healthCheck': void
-```
+ 'updateLiveliness': void // Non-host clients send this periodically
+ ```
 
 ## CI/CD Pipeline
 

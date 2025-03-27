@@ -3,7 +3,7 @@ export interface User {
   displayName: string;
   joinedAt: Date;
   health?: number;
-  lastHealthCheck?: string;
+  lastLivelinessUpdateAt?: string;
 }
 
 export interface Room {
