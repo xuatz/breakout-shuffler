@@ -26,7 +26,8 @@ export type RoomEvent =
   | { type: 'RETRY' }
   | { type: 'JOINED_ROOM' }
   | { type: 'ERROR'; message: string }
-  | { type: 'ROOM_STATE_UPDATED'; state: RoomState; groups?: GroupAssignment }
+  | { type: 'ROOM_BREAKOUT_ACTIVE'; state: RoomState; groups?: GroupAssignment }
+  | { type: 'ROOM_BREAKOUT_ABORT'; state: RoomState; groups?: GroupAssignment }
   | { type: 'START_BREAKOUT' }
   | { type: 'END_BREAKOUT' }
   | { type: 'ABORT_BREAKOUT' }

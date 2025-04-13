@@ -7,7 +7,7 @@ import { useMachine } from '@xstate/react';
 import { displayNameAtom } from '~/atoms/displayName';
 import { UserList } from '../components/UserList';
 import { ErrorMessage } from '../components/ErrorMessage';
-import { sendSocketMessage, socket } from '~/lib/socket';
+import { socket } from '~/lib/socket';
 import { roomMachine } from '~/machines/roomMachine';
 
 export function meta({}: Route.MetaArgs) {
@@ -60,7 +60,11 @@ export default function Room() {
       state: 'waiting' | 'active';
       groups?: { [groupId: string]: string[] };
     }) => {
-      send({ type: 'ROOM_STATE_UPDATED', state, groups });
+      if (state === 'active') {
+        send({ type: 'ROOM_BREAKOUT_ACTIVE', state, groups });
+      } else {
+        send({ type: 'ROOM_BREAKOUT_ABORT', state, groups });
+      }
     };
 
     socket.on('joinedRoom', handleJoinedRoom);
@@ -73,8 +77,6 @@ export default function Room() {
       socket.off('kicked', handleKicked);
     };
   }, [roomId, send]);
-
-  // Use XState machine state to determine what to render
 
   // If no roomId is provided, show invalid room message
   if (!roomId) {
@@ -179,10 +181,10 @@ export default function Room() {
         </h1>
 
         <div className="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-gray-900">
-          {state.matches({ joined: 'active' }) && state.context.userGroup && (
+          {state.matches({ joined: 'active' }) && (
             <div className="mb-6 p-4 bg-blue-100 dark:bg-blue-900 rounded-lg">
               <p className="text-lg font-semibold text-blue-800 dark:text-blue-100">
-                You are in Group {state.context.userGroup}
+                You are in Group {Number(state.context.userGroup || 0) + 1}
               </p>
             </div>
           )}

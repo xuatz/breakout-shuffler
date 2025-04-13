@@ -13,7 +13,7 @@ export const roomMachine = setup({
     checkRoomActor,
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QCcD2qC2A6AlhANmAMQBSA8gJIByA2gAwC6ioADqrDgC46oB2zIAB6IAjHQCc4rOIBMIgOziRAZjrzlygKwAOADQgAnogAsGrCIBsdHcfGnNMi8YC+z-Wky4CxAMIAJAFEfAGkAfQAlMjIAWXomJBA2Dm4+AWEEMW0pWQUlVXUtPUNEC3ELLBllbXk6a2VjYwsZcVd3dGwAYwALMA6AaxxeKCIIPjBcXgA3VD7xj06e-sGoBEHpjoBDFN44uIEkrh5+BPSm-SMMzXltLGqRY0VjayuRVpB5rG7egaGRsYnprMsB8vkshqspqhNttdiJ4qx2IdUidRBJsnJFCo1BodOcSsYbupqrVNMYZGodG8QYsfsMwMg0MgsCx8FsAGaoZDYanfZYQ9ZbI67Rj7RHbNKoyTSDF5bGFPEITRKrDXJWSTTPTTiTRU9pYABWqEGyz+vHGaxmcz1huN4It0KFjD2CQO4pRCBkMnkKrK2h01yqDzoygVYmDWGMIm0ygD8gs8euus8Nt4JvpjOZrM4HK5wOtRtTdshDr4wvhiTFRwlCHkMlDzWM0ijMejpWsBKT2AA7htDkMAGKcgDKUNmnFIlCoAQAIhEorERS7K8jQOlPd7FBY-dVo9ogyHiggLGYCdot01FPIHNpO1ge32oIPkCP+mBxwFwpFws6Eckq+71x9Ld-V3fcFWjTQVREBwyWgpwrhkW8U0gIhIhiUIhwAFQAQUwgJQgAVQABWnXCZx-Cs-xXIREHkWsVQsJURBkPclB0EQFS9ZQI0cGQlWMa9lBEFQkILFDAmwgAZTC-EIkiyIo11-1XWjxEJMorzJUkrm0IoLgUb0HiEkRZGUJwvVEwYUI-L9FOXY4VIQVssCcOgCWuGRTDoZjwJELAHFqOg+PqT0zJaNx3nzKyICIYIKBCcjF1-JEHJopztBkLB6jMjKz2PGwFU0UoGLkBwtQE0pLLNCA717bhfiw7Dwkw0IACFwgCbDgjIAjMLsqjUvSbSeKjaCdGUJQWIVIMsuUTzN1rPigosKrICwDYOm4SZiACKhZ3azrut6-qUurUlMs8yQ6JjNT+IVeMLqqCx5CeAk+M0V4Io+ZCao2rbiGw1qyGatqOq6nq+qSyjTvdc6KlscRrsUP1SUK+MKj9CxoN0s9SWUVwIt4VAIDgAR5lFAbqwAWgsBUqcgtTAqZpmo1vPBCApmHHLDOhpSjIzxFqOaOMPK5vQ+0qTI+3TmNvUFaU5t1udMG4dOeRo1SVQq4xcmNoNUD7az3KrlkV5S0pjTKEdkJptEsDKRf0ubececQhNUMpIx1L69XverH2HUc3zN6j0jJcCY2kSM7ePckCTUVaIBDwbECqPyJEtsonGEnzDyqTLo0usQty0AzE9qh9k+rF7ILEWQjbUKwptF2QsG8uQuIyoSXvLv6cG2qv3TJKQM9rLPI2EutRe86R6mDLJqiqMyCecIA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QCcD2qC2A6AlhANmAMQBSA8gJIByA2gAwC6ioADqrDgC46oB2zIAB6IAtAEYAnFgDMdaWIDsAVgBsAJgkqlE1dIA0IAJ6iVADgVYVC0wBYV0tWqV2HAX1cG0mXAWIBhAAkAUT8AaQB9ACUyMgBZeiYkEDYObj4BYQRxGzosBStpUxUJDTEtA2Ms0zE1LDUcugU1MTobU1sld090bABjAAswXoBrHF4oIgg+MFxeADdUYZmvPsGRsagEMYXegEM03gSEgRSuHn4kzLElaSwxWTazZqKlOlMK0U0LCTpnsVMlGoVCoal0QCssAMhqNxpNprMFkssBCoetxlt5qg9gcjmJEqx2Gd0pdRM5btIVL8FP8bP9lGIPllHlhqgo2XIFDYbkpTGCUWsYRMwMg0MgsCx8PsAGaoZDYfnQjYYnb7c5HRgnQkHDKiNT5LB0eymWQ8mxqN5qRkiCT-O48koScxOBStPk9LAAK1QYw2cN4M22i2W7q9PvRgexasYxySp21JIQ+SUBukjuN1mkFPKRlEqdqnLaFMkZXNNjd3lDvF9wtF4slnBlcuRIe9VfDmMjfHV+OSWvOOoQmbElm0vxabTUpj1NitSmpLJtYjaPyUkhUZY84PdAHddmdxgAxWUAZSxS04pEoVCCABEojF4hrY33iaArjk7jlmjbqqvF1aHGHRozTUIcbg5ctsF3fcoCPZBTxGMALyCSJokiGMCVSfsE2tYczFaOg6FeUxNDoGorVpFQsAkF1fh+VN1zNSDPVbSAiGiOJwgAIUiIIAEFQjIABVAAVcI+L8ESKAANSCDDeyw18hFEGoqKHeQimaQjzAkK0zBkBxQM0LQXRI5jKzYjjYm43iBOEsS+K4shIhE+S42wt9EC5GwDMcfJgQkQL1ytcw8nyBRpDZdlGmaczWIgIgULQtyXwuTyEEpCwbAkGxpGyr9qVTADcryHRVCBUCs2NOKxjY0IKDCW8UsUtLlKyc1h1pGjGjeVcLQAzMsBsM02W0cxnDImr-QgLBoO4WFjxEviXJs-jBNE5qiVaq4nGo2kqUaLRtEKRkShZIFMxKQiJApOgJCmyAsF2XpuDmYggioO8eLW+zNvjdLFFyYE2SCpxVzMRlJFuV4aWqSjDWGh6Zue17iEc5yxO+uyNqfTCtoHf5ah+KdmhB6cKUZeQqKcBx8l+OxbDUdxN14VAIDgAQVk1FqBxEbRh1uvUaTpVcrRaJRk0cPrV2GvLeU3CE8EIbn8Zw-4qNMOQAWkVR2muWdVwNGpQJuBxM3MZjUUFFX-rawm7jI9onBtXKrEtHMqlkajKUUQEtBsZQpo2G2PLazWfIUG1COysQl3kfQPZEMxTDyQj1ycKcHBo5i5o2OCEPPEOlKuBwsAliXI+B2PCneRPUx8nkmnXQEAQBDdugreKi+2lTOQM+51a0t5a8qcRlANIKQUNIobpupHZr3eaoG7gdzWTLPQKKdo2ljvT19njQ5EpTM8vnlGcDelecID6iXaaWkXVpdpIeuOo7sUVNtFeakxGZ1wgA */
   id: 'room',
   initial: 'idle',
   context: {
@@ -118,34 +118,47 @@ export const roomMachine = setup({
         },
       },
       on: {
-        ROOM_STATE_UPDATED: {
-          actions: [
-            assign({
-              roomState: ({ event }) => event.state,
-              groups: ({ event }) => event.groups,
-              // Update userGroup if groups are provided and user is in a group
-              userGroup: ({ context, event }) => {
-                if (!event.groups || !context.roomId) return undefined;
-
-                // Find which group the user is in
-                for (const [groupId, users] of Object.entries(event.groups)) {
-                  if (users.includes(context.roomId)) {
-                    return groupId;
-                  }
-                }
+        ROOM_BREAKOUT_ACTIVE: {
+          target: '.active',
+          actions: assign({
+            roomState: ({ event }) => event.state,
+            groups: ({ event }) => event.groups,
+            // Update userGroup if groups are provided and user is in a group
+            userGroup: ({ context, event }) => {
+              if (!event.groups) {
                 return undefined;
-              },
-            }),
-            // Transition to correct state based on room state
-            ({ event }) => {
-              if (event.state === 'active') {
-                return { type: 'START_BREAKOUT' };
-              } else {
-                return { type: 'END_BREAKOUT' };
               }
+
+              // Extract user ID from cookie
+              const userId = document.cookie
+                .split('; ')
+                .find((row) => row.startsWith('_bsid='))
+                ?.split('=')[1];
+
+              if (!userId) {
+                return undefined;
+              }
+
+              // Find which group the user is in
+              for (const [groupId, users] of Object.entries(event.groups)) {
+                if (users.includes(userId)) {
+                  return groupId;
+                }
+              }
+
+              return undefined;
             },
-          ],
+          }),
         },
+        ROOM_BREAKOUT_ABORT: {
+          target: '.waiting',
+          actions: assign({
+            roomState: ({ event }) => event.state,
+            groups: ({ event }) => event.groups,
+            userGroup: (_) => undefined,
+          }),
+        },
+        // ROOM_BREAKOUT_END: {},
         ERROR: {
           actions: assign({
             error: ({ event }) => event.message,
