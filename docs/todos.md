@@ -16,14 +16,17 @@
 - [ ] auto prettier on staged
 - [ ] (host) nudge user feature
 - [ ] (participant) UI feedback from getting kicked from host
-- [ ] (host) improve group size selection
-  - when host try to change numbers, because it does not allow value below 1, to change it from 1 to 4, you have either type 14 and then delete the 1
-    or 41 and then delete the 1
+- [ ] need to get a new domain name for this app
+- [ ] move deployment to https://render.com
+- [ ] need to solve the problem with regards to getting https cert on local dev without having any browser warning, without any user action required (if possible)
 - [x] hide "ping" button unless debug mode on
 - [x] Begin XState refactoring for room.tsx - implemented basic room joining flow
 - [x] Continue XState refactoring:
   - [x] Refactor room state management (waiting vs active)
   - [x] Refactor socket event handling with XState
+- [x] (host) improve group size selection
+  - when host try to change numbers, because it does not allow value below 1, to change it from 1 to 4, you have either type 14 and then delete the 1
+    or 41 and then delete the 1
 
 ## Roadmap-derived Tasks
 
@@ -31,7 +34,7 @@
 
 - [ ] Handle late-joining participants (purgatory area)
 - [ ] Different UIs for host/participants in active state
-- [ ] Group naming/labeling features
+- [ ] Group naming/labelling features
 - [ ] Implement repeat minimization algorithm for group assignments
 
 ### Health System

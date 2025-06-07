@@ -246,18 +246,15 @@ export default function Host() {
                         : 'Number of Groups'}
                     </label>
                     <input
-                      type="number"
-                      min="1"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={groupingMode === 'size' ? groupSize : groupCount}
                       onChange={(e) => {
-                        const value = Math.max(
-                          1,
-                          parseInt(e.target.value) || 1
-                        );
                         if (groupingMode === 'size') {
-                          setGroupSize(value);
+                          setGroupSize(e.target.value);
                         } else {
-                          setGroupCount(value);
+                          setGroupCount(e.target.value);
                         }
                       }}
                       className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
