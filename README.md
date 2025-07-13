@@ -35,6 +35,32 @@ Because this application shares the cookie between the client and server app, it
 1. certs are in caddy
 2. https://github.com/FiloSottile/mkcert#installing-the-ca-on-other-systems
 
+## Claude Code Web UI with Tailscale
+
+To expose the Claude Code web UI through Tailscale:
+
+1. Configure Tailscale to accept routes (if needed):
+   ```bash
+   sudo tailscale set --accept-routes
+   ```
+
+2. Login to Tailscale:
+   ```bash
+   sudo tailscale login
+   ```
+
+3. Start Claude Code web UI:
+   ```bash
+   ./claude-code-webui-linux-x64
+   ```
+
+4. Expose it through Tailscale (runs in background):
+   ```bash
+   sudo tailscale serve --bg http://localhost:8080
+   ```
+
+The Claude Code web UI will now be accessible through your Tailscale network.
+
 ## Workspace Structure
 
 - `apps/`: Application-specific projects
