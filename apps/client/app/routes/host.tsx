@@ -205,6 +205,18 @@ export default function Host() {
                 <span>{showCopied ? 'Copied!' : 'Copy Room Link'}</span>
                 <ClipboardIcon className="h-5 w-5" />
               </button>
+              <button
+                onClick={() => {
+                  const posterUrl = `${window.location.origin}/rooms/${roomId}/poster`;
+                  navigator.clipboard.writeText(posterUrl);
+                  setShowCopied(true);
+                  setTimeout(() => setShowCopied(false), 8000);
+                }}
+                className="w-full px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors flex items-center justify-center gap-x-2"
+              >
+                <span>{showCopied ? 'Copied!' : 'Copy Poster Link'}</span>
+                <ClipboardIcon className="h-5 w-5" />
+              </button>
               <span className="text-gray-700 dark:text-gray-300">
                 {joinUrl}
               </span>
