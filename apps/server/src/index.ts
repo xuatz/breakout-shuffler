@@ -19,7 +19,7 @@ const origin = [
   'http://192.168.2.136:5173',
   'https://client.breakout.local',
   'https://breakout-shuffler.xuatz.com',
-  'https://breakout-shuffler.staging.xuatz.com'
+  'https://breakout-shuffler.staging.xuatz.com',
 ];
 
 // Create Redis client
@@ -62,7 +62,7 @@ const socketService = new SocketService(
   io,
   roomService,
   userRepository,
-  nudgeRepository
+  nudgeRepository,
 );
 
 app.use(
@@ -72,7 +72,7 @@ app.use(
     allowHeaders: ['Content-Type', 'Authorization'],
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
-  })
+  }),
 );
 
 app.get('/host', async (c) => {
@@ -118,7 +118,7 @@ app.get('/rooms/:id/participants', async (c) => {
   if (!room) {
     return c.json({ error: 'Room not found' }, 404);
   }
-  
+
   const participants = await roomService.getParticipants(roomId);
   return c.json({ participants });
 });
@@ -166,7 +166,7 @@ app.get('/me/displayName', async (c) => {
   if (!userId) {
     throw new HTTPException(403, { message: 'Missing userId' });
   }
-  
+
   const displayName = await userRepository.getDisplayName(userId);
 
   if (!displayName) {

@@ -3,7 +3,7 @@ type GroupDistributionMode = 'size' | 'count';
 export function calculateGroupDistribution(
   totalParticipants: number,
   mode: GroupDistributionMode,
-  value: number
+  value: number,
 ): number[] {
   if (totalParticipants === 0) return [];
   if (value <= 0) return [totalParticipants];
@@ -29,7 +29,7 @@ export function calculateGroupDistribution(
     while (remainingToDistribute > 0) {
       const currentAddition = Math.min(
         targetSize - distribution[index],
-        remainingToDistribute
+        remainingToDistribute,
       );
       distribution[index] += currentAddition;
       remainingToDistribute -= currentAddition;

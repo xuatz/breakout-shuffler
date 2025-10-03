@@ -86,7 +86,7 @@ export default function App() {
           `${import.meta.env.VITE_API_URL}/me/displayName`,
           {
             credentials: 'include',
-          }
+          },
         );
 
         if (!response.ok) {
@@ -113,7 +113,7 @@ export default function App() {
         nudges.map((nudge: any) => ({
           ...nudge,
           lastNudge: new Date(nudge.lastNudge),
-        }))
+        })),
       );
     };
 

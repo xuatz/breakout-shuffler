@@ -25,7 +25,7 @@ export class NudgeRepository extends BaseRepository {
 
   async getNudgeForUser(
     roomId: string,
-    userId: string
+    userId: string,
   ): Promise<NudgeData | undefined> {
     const key = this.getKey(roomId);
     const nudgeData = await this.redis.hget(key, userId);
@@ -35,7 +35,7 @@ export class NudgeRepository extends BaseRepository {
   async updateNudge(
     roomId: string,
     userId: string,
-    displayName: string
+    displayName: string,
   ): Promise<void> {
     const key = this.getKey(roomId);
     const existingData = await this.getNudgeForUser(roomId, userId);

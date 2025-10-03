@@ -111,7 +111,7 @@ export class RoomRepository extends BaseRepository {
   }
 
   private async getGroups(
-    roomId: string
+    roomId: string,
   ): Promise<{ [groupId: string]: string[] } | undefined> {
     const groupIds = await this.getSetMembers(`room:${roomId}:groups`);
     if (groupIds.length === 0) return undefined;
@@ -120,12 +120,12 @@ export class RoomRepository extends BaseRepository {
     await Promise.all(
       groupIds.map(async (groupId) => {
         const participants = await this.getSetMembers(
-          `room:${roomId}:group:${groupId}`
+          `room:${roomId}:group:${groupId}`,
         );
         if (participants.length > 0) {
           groups[groupId] = participants;
         }
-      })
+      }),
     );
 
     return Object.keys(groups).length > 0 ? groups : undefined;
@@ -133,7 +133,7 @@ export class RoomRepository extends BaseRepository {
 
   private async setGroups(
     roomId: string,
-    groups: { [groupId: string]: string[] }
+    groups: { [groupId: string]: string[] },
   ): Promise<void> {
     // Clear existing groups first
     await this.clearGroups(roomId);
@@ -146,7 +146,10 @@ export class RoomRepository extends BaseRepository {
         this.redis.sadd(`room:${roomId}:groups`, ...groupIds),
         // Store participants for each group
         ...groupIds.map((groupId) =>
-          this.redis.sadd(`room:${roomId}:group:${groupId}`, ...groups[groupId])
+          this.redis.sadd(
+            `room:${roomId}:group:${groupId}`,
+            ...groups[groupId],
+          ),
         ),
       ]);
     }
@@ -158,7 +161,7 @@ export class RoomRepository extends BaseRepository {
       await Promise.all([
         // Delete all group participant sets
         ...groupIds.map((groupId) =>
-          this.redis.del(`room:${roomId}:group:${groupId}`)
+          this.redis.del(`room:${roomId}:group:${groupId}`),
         ),
         // Delete the groups set itself
         this.redis.del(`room:${roomId}:groups`),

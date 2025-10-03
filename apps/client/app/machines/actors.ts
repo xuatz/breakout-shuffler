@@ -11,7 +11,7 @@ export const joinRoomActor = fromPromise(
       {
         method: 'POST',
         credentials: 'include',
-      }
+      },
     );
 
     if (!response.ok) {
@@ -22,7 +22,7 @@ export const joinRoomActor = fromPromise(
     sendSocketMessage('joinRoom', { roomId });
 
     return { roomId };
-  }
+  },
 );
 
 export const checkRoomActor = fromPromise(
@@ -34,7 +34,7 @@ export const checkRoomActor = fromPromise(
       {
         method: 'POST',
         credentials: 'include',
-      }
+      },
     );
 
     if (!response.ok) {
@@ -43,5 +43,5 @@ export const checkRoomActor = fromPromise(
 
     const data = await response.json();
     return { isParticipant: data.isParticipant };
-  }
+  },
 );

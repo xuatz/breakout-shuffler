@@ -11,7 +11,7 @@ type Callback<Value> = (
   get: Getter,
   set: Setter,
   newVal: Value,
-  prevVal: Value
+  prevVal: Value,
 ) => void;
 
 export function atomWithListeners<Value>(initialValue: Value) {
@@ -29,7 +29,7 @@ export function atomWithListeners<Value>(initialValue: Value) {
       get(listenersAtom).forEach((callback) => {
         callback(get, set, newVal, prevVal);
       });
-    }
+    },
   );
 
   const useListener = (callback: Callback<Value>) => {

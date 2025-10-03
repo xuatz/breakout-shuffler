@@ -42,7 +42,7 @@ describe('RoomService', () => {
       vi.spyOn(roomRepository, 'getRoom').mockResolvedValue(undefined);
 
       await expect(roomService.startBreakout('room-1', [2, 2])).rejects.toThrow(
-        'Room not found'
+        'Room not found',
       );
     });
 
@@ -51,25 +51,25 @@ describe('RoomService', () => {
       vi.spyOn(roomRepository, 'getParticipants').mockResolvedValue([]);
 
       await expect(roomService.startBreakout('room-1', [2, 2])).rejects.toThrow(
-        'No participants in room'
+        'No participants in room',
       );
     });
 
     it('throws error if distribution total does not match participant count', async () => {
       vi.spyOn(roomRepository, 'getRoom').mockResolvedValue(mockRoom);
       vi.spyOn(roomRepository, 'getParticipants').mockResolvedValue(
-        mockParticipants
+        mockParticipants,
       );
 
       await expect(roomService.startBreakout('room-1', [2, 2])).rejects.toThrow(
-        'Distribution total does not match participant count'
+        'Distribution total does not match participant count',
       );
     });
 
     it('creates groups based on distribution', async () => {
       vi.spyOn(roomRepository, 'getRoom').mockResolvedValue(mockRoom);
       vi.spyOn(roomRepository, 'getParticipants').mockResolvedValue(
-        mockParticipants
+        mockParticipants,
       );
       vi.spyOn(roomRepository, 'updateRoom').mockResolvedValue();
 
@@ -93,14 +93,14 @@ describe('RoomService', () => {
       ];
       expect(allAssignedParticipants.length).toBe(mockParticipants.length);
       expect(new Set(allAssignedParticipants).size).toBe(
-        mockParticipants.length
+        mockParticipants.length,
       ); // No duplicates
     });
 
     it('updates room with new state and groups', async () => {
       vi.spyOn(roomRepository, 'getRoom').mockResolvedValue(mockRoom);
       vi.spyOn(roomRepository, 'getParticipants').mockResolvedValue(
-        mockParticipants
+        mockParticipants,
       );
       const updateRoomSpy = vi
         .spyOn(roomRepository, 'updateRoom')

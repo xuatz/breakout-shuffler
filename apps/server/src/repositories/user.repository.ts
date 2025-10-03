@@ -29,7 +29,7 @@ export class UserRepository extends BaseRepository {
     console.log('[UserRepository] Getting display name for:', userId);
     const displayName = await this.getHashField(
       `user:${userId}`,
-      'displayName'
+      'displayName',
     );
     console.log('[UserRepository] Retrieved display name:', {
       userId,
@@ -60,7 +60,7 @@ export class UserRepository extends BaseRepository {
   async getLiveliness(userId: string): Promise<string | undefined> {
     const timestamp = await this.getHashField(
       `user:${userId}`,
-      'lastLivelinessUpdateAt'
+      'lastLivelinessUpdateAt',
     );
     return timestamp || undefined;
   }

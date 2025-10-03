@@ -25,7 +25,7 @@ export class SocketService {
     private io: Server,
     private roomService: RoomService,
     private userRepository: UserRepository,
-    private nudgeRepository: NudgeRepository
+    private nudgeRepository: NudgeRepository,
   ) {
     this.clientMap = new Map();
     this.cookieService = new CookieService();
@@ -66,8 +66,11 @@ export class SocketService {
             throw new Error('Only the host can kick users');
           }
 
-          await this.roomService.removeParticipant(request.roomId, request.targetUserId);
-          
+          await this.roomService.removeParticipant(
+            request.roomId,
+            request.targetUserId,
+          );
+
           // Notify the kicked user
           const kickedUserSocket = this.clientMap.get(request.targetUserId);
           if (kickedUserSocket) {
@@ -76,8 +79,12 @@ export class SocketService {
           }
 
           // Update participant list for remaining users
-          const participants = await this.roomService.getParticipants(request.roomId);
-          this.io.to(request.roomId).emit('participantsUpdated', { participants });
+          const participants = await this.roomService.getParticipants(
+            request.roomId,
+          );
+          this.io
+            .to(request.roomId)
+            .emit('participantsUpdated', { participants });
         } catch (error) {
           this.handleError(socket, 'Kick user error', error);
         }
@@ -143,7 +150,7 @@ export class SocketService {
 
           const updatedRoom = await this.roomService.startBreakout(
             request.roomId,
-            request.distribution
+            request.distribution,
           );
           this.io.to(request.roomId).emit('roomStateUpdated', {
             state: updatedRoom.state,
@@ -208,12 +215,12 @@ export class SocketService {
           socket.to(roomId).emit('debugPing', { pingerId, roomId });
 
           const userId = this.getUserId(socket);
-          const room = await this.roomService.getRoomByParticipant(userId)
+          const room = await this.roomService.getRoomByParticipant(userId);
 
           if (!room) {
             return;
           }
-        }
+        },
       );
 
       socket.on(
@@ -244,7 +251,7 @@ export class SocketService {
           } catch (error) {
             this.handleError(socket, 'Add dummy participants error', error);
           }
-        }
+        },
       );
 
       // Nudge events
@@ -318,7 +325,7 @@ export class SocketService {
 
   private getUserId(socket: Socket): string {
     const userId = this.cookieService.extractUserId(
-      socket.handshake.headers.cookie
+      socket.handshake.headers.cookie,
     );
     if (!userId) {
       throw new Error('No user ID found');

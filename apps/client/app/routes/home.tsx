@@ -29,7 +29,7 @@ export default function Home() {
         `${import.meta.env.VITE_API_URL}/rooms/${roomId}/join`,
         {
           method: 'POST',
-        }
+        },
       );
 
       if (!response.ok) {

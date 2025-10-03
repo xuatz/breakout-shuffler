@@ -19,7 +19,11 @@ export const HostActionModal: React.FC<HostActionModalProps> = ({
   onClose,
 }) => {
   return (
-    <Modal isOpen={isOpen} title={`Actions for ${participant.displayName}`} onClose={onClose}>
+    <Modal
+      isOpen={isOpen}
+      title={`Actions for ${participant.displayName}`}
+      onClose={onClose}
+    >
       <div className="flex flex-col gap-4 p-4">
         <button
           onClick={() => {

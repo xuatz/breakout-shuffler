@@ -40,7 +40,7 @@ export function UserList({
           `${import.meta.env.VITE_API_URL}/rooms/${roomId}/participants`,
           {
             credentials: 'include',
-          }
+          },
         );
 
         if (response.ok) {

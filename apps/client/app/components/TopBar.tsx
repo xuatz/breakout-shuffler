@@ -30,7 +30,7 @@ export function TopBar() {
       setIsWiggling(true);
       const timer = setTimeout(() => setIsWiggling(false), 500);
       return () => clearTimeout(timer);
-    }, [])
+    }, []),
   );
 
   useEffect(() => {

@@ -18,7 +18,7 @@ export interface User {
 export class RoomService {
   constructor(
     private roomRepository: RoomRepository,
-    private userRepository: UserRepository
+    private userRepository: UserRepository,
   ) {}
 
   async getRooms() {
@@ -80,7 +80,7 @@ export class RoomService {
           displayName: userData?.displayName,
           lastLivelinessUpdateAt: userData?.lastLivelinessUpdateAt,
         };
-      })
+      }),
     );
     return participants;
   }
@@ -108,7 +108,7 @@ export class RoomService {
     // Validate distribution total matches participant count
     const totalInDistribution = distribution.reduce(
       (sum, size) => sum + size,
-      0
+      0,
     );
     if (totalInDistribution !== participants.length) {
       throw new Error('Distribution total does not match participant count');
@@ -116,7 +116,7 @@ export class RoomService {
 
     // Randomly shuffle participants
     const shuffledParticipants = [...participants].sort(
-      () => Math.random() - 0.5
+      () => Math.random() - 0.5,
     );
 
     // Create groups based on the distribution

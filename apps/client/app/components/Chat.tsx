@@ -6,7 +6,7 @@ const Chat: React.FC = () => {
   const [isUsernameSet, setIsUsernameSet] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<{ user: string; text: string }[]>(
-    []
+    [],
   );
 
   useEffect(() => {

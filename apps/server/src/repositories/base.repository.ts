@@ -21,7 +21,7 @@ export abstract class BaseRepository {
           } catch {}
         }
         return [key, value];
-      })
+      }),
     );
 
     return parsedData as T;
@@ -29,14 +29,14 @@ export abstract class BaseRepository {
 
   protected async getHashField(
     key: string,
-    field: string
+    field: string,
   ): Promise<string | null> {
     return this.redis.hget(key, field);
   }
 
   protected async setHash(
     key: string,
-    data: Record<string, any>
+    data: Record<string, any>,
   ): Promise<void> {
     const entries = Object.entries(data).map(([field, value]) => [
       field,

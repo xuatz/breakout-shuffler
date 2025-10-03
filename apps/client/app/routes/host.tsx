@@ -57,7 +57,9 @@ export default function Host() {
           }
         } catch (error) {
           setError(
-            error instanceof Error ? error.message : 'Failed to fetch host room'
+            error instanceof Error
+              ? error.message
+              : 'Failed to fetch host room',
           );
         }
       };
@@ -66,7 +68,7 @@ export default function Host() {
         fetchHostRoom();
       }
     },
-    [cookies._bsid, setActiveRoom]
+    [cookies._bsid, setActiveRoom],
   );
 
   useEffect(() => {
@@ -124,7 +126,7 @@ export default function Host() {
       socket.emit('createRoom');
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : 'Failed to create room'
+        error instanceof Error ? error.message : 'Failed to create room',
       );
     }
   };
@@ -135,7 +137,7 @@ export default function Host() {
     const distribution = calculateGroupDistribution(
       participants.length,
       groupingMode,
-      groupingMode === 'size' ? groupSize : groupCount
+      groupingMode === 'size' ? groupSize : groupCount,
     );
 
     socket.emit('startBreakout', {
@@ -281,7 +283,7 @@ export default function Host() {
                       {calculateGroupDistribution(
                         participants.length,
                         groupingMode,
-                        groupingMode === 'size' ? groupSize : groupCount
+                        groupingMode === 'size' ? groupSize : groupCount,
                       ).map((size, index) => (
                         <p key={index} className="ml-4">
                           Group {index + 1}: {size} participants
@@ -328,16 +330,28 @@ export default function Host() {
 
               {cookies._debug && (
                 <div className="w-full p-4 bg-gray-100 dark:bg-gray-700 rounded-lg mb-4">
-                  <h3 className="text-gray-700 dark:text-gray-200 font-medium mb-4">Debug Controls</h3>
+                  <h3 className="text-gray-700 dark:text-gray-200 font-medium mb-4">
+                    Debug Controls
+                  </h3>
                   <div className="flex gap-x-4">
                     <button
-                      onClick={() => socket.emit('debugAddDummyParticipants', { roomId, count: 1 })}
+                      onClick={() =>
+                        socket.emit('debugAddDummyParticipants', {
+                          roomId,
+                          count: 1,
+                        })
+                      }
                       className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
                     >
                       Add 1 Dummy
                     </button>
                     <button
-                      onClick={() => socket.emit('debugAddDummyParticipants', { roomId, count: 10 })}
+                      onClick={() =>
+                        socket.emit('debugAddDummyParticipants', {
+                          roomId,
+                          count: 10,
+                        })
+                      }
                       className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
                     >
                       Add 10 Dummies

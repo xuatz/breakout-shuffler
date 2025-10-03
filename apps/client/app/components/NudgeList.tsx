@@ -12,7 +12,7 @@ export function NudgeList({ isWiggling }: { isWiggling?: boolean }) {
 
   // Sort nudges by most recent
   const sortedNudges = [...nudges].sort(
-    (a, b) => new Date(b.lastNudge).getTime() - new Date(a.lastNudge).getTime()
+    (a, b) => new Date(b.lastNudge).getTime() - new Date(a.lastNudge).getTime(),
   );
 
   return (
@@ -28,7 +28,7 @@ export function NudgeList({ isWiggling }: { isWiggling?: boolean }) {
                 <span
                   className={twMerge(
                     'text-gray-700 dark:text-gray-300',
-                    index === 0 && 'font-bold'
+                    index === 0 && 'font-bold',
                   )}
                 >
                   {nudge.displayName}
@@ -36,7 +36,7 @@ export function NudgeList({ isWiggling }: { isWiggling?: boolean }) {
                 <span
                   className={twMerge(
                     'text-gray-500 dark:text-gray-400 text-sm',
-                    index === 0 && isWiggling && 'animate-wiggle'
+                    index === 0 && isWiggling && 'animate-wiggle',
                   )}
                 >
                   {nudge.count} nudge{nudge.count !== 1 ? 's' : ''}
