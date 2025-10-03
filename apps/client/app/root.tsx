@@ -31,6 +31,10 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const isPosterPage =
+    typeof window !== 'undefined' &&
+    window.location.pathname.includes('/poster');
+
   return (
     <html lang="en">
       <head>
@@ -40,7 +44,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <TopBar />
+        {!isPosterPage && <TopBar />}
         {children}
         <ScrollRestoration />
         <Scripts />
