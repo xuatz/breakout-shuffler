@@ -132,13 +132,13 @@ export function TopBar() {
               setIsMenuOpen(false);
             },
           },
+          {
+            label: 'Clear Cookies',
+            onClick: handleClearCookies,
+            isDanger: true,
+          },
         ]
       : []),
-    {
-      label: 'Clear Cookies',
-      onClick: handleClearCookies,
-      isDanger: true,
-    },
   ];
 
   return (
