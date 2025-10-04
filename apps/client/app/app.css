@@ -20,4 +20,16 @@ body {
       transform: rotate(8deg);
     }
   }
+
+  --animate-float-up: float-up 1s ease-out forwards;
+  @keyframes float-up {
+    0% {
+      transform: translate(-50%, 0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -40px) scale(1.5);
+      opacity: 0;
+    }
+  }
 }

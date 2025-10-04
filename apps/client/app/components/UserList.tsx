@@ -21,6 +21,7 @@ export function UserList({
   const userId = cookies._bsid;
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [nudgeAnimations, setNudgeAnimations] = useState<number[]>([]);
 
   // Set up liveliness update interval
   useEffect(() => {
@@ -124,10 +125,23 @@ export function UserList({
           <button
             onClick={() => {
               sendSocketMessage('nudgeHost');
+              const animId = Date.now();
+              setNudgeAnimations((prev) => [...prev, animId]);
+              setTimeout(() => {
+                setNudgeAnimations((prev) => prev.filter((id) => id !== animId));
+              }, 1000);
             }}
-            className="px-2 py-1 text-sm bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded transition-colors duration-200"
+            className="relative px-2 py-1 text-sm bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded transition-colors duration-200"
           >
             Nudge Host
+            {nudgeAnimations.map((animId) => (
+              <span
+                key={animId}
+                className="absolute left-1/2 top-0 pointer-events-none animate-float-up"
+              >
+                👋
+              </span>
+            ))}
           </button>
         )}
       </h3>
