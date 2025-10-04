@@ -123,6 +123,17 @@ app.get('/rooms/:id/participants', async (c) => {
   return c.json({ participants });
 });
 
+app.get('/rooms/:id/nudges', async (c) => {
+  const roomId = c.req.param('id');
+  const room = await roomService.getRoom(roomId);
+  if (!room) {
+    return c.json({ error: 'Room not found' }, 404);
+  }
+
+  const nudges = await nudgeRepository.getNudges(roomId);
+  return c.json({ nudges });
+});
+
 app.post('/rooms/:id/me', async (c) => {
   const userId = getCookie(c, '_bsid');
   if (!userId) {

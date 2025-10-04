@@ -3,6 +3,7 @@ import type { Route } from '../+types/root';
 import { useParams } from 'react-router';
 import { QRCodeSVG } from 'qrcode.react';
 import type { Room, User } from '../types';
+import type { NudgeData } from '../atoms/nudge';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -68,13 +69,26 @@ interface WaitingStateViewProps {
   roomId: string;
   joinUrl: string;
   participants: User[];
+  nudges: NudgeData[];
 }
 
 function WaitingStateView({
   roomId,
   joinUrl,
   participants,
+  nudges,
 }: WaitingStateViewProps) {
+  const participantsWithNudges = participants.map((p) => {
+    const nudgeData = nudges.find((n) => n.userId === p.id);
+    return {
+      ...p,
+      nudgeCount: nudgeData?.count || 0,
+    };
+  });
+
+  const sortedParticipants = [...participantsWithNudges].sort(
+    (a, b) => b.nudgeCount - a.nudgeCount,
+  );
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto">
@@ -135,14 +149,21 @@ function WaitingStateView({
                 </p>
               ) : (
                 <ol className="space-y-3">
-                  {participants.map((participant, index) => (
+                  {sortedParticipants.map((participant, index) => (
                     <li
                       key={participant.id || index}
                       className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
                     >
-                      <span className="text-2xl font-medium text-gray-900 dark:text-white">
-                        {index + 1}. {participant.displayName}
-                      </span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-medium text-gray-900 dark:text-white">
+                          {index + 1}. {participant.displayName}
+                        </span>
+                        {participant.nudgeCount > 0 && (
+                          <span className="text-2xl font-semibold text-blue-600 dark:text-blue-400">
+                            👋 {participant.nudgeCount}
+                          </span>
+                        )}
+                      </div>
                     </li>
                   ))}
                 </ol>
@@ -256,6 +277,7 @@ export default function Poster() {
   const { roomId } = useParams();
   const [room, setRoom] = useState<Room | null>(null);
   const [participants, setParticipants] = useState<User[]>([]);
+  const [nudges, setNudges] = useState<NudgeData[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -266,10 +288,12 @@ export default function Poster() {
 
     const fetchRoomData = async () => {
       try {
-        const [roomResponse, participantsResponse] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/rooms/${roomId}`),
-          fetch(`${import.meta.env.VITE_API_URL}/rooms/${roomId}/participants`),
-        ]);
+        const [roomResponse, participantsResponse, nudgesResponse] =
+          await Promise.all([
+            fetch(`${import.meta.env.VITE_API_URL}/rooms/${roomId}`),
+            fetch(`${import.meta.env.VITE_API_URL}/rooms/${roomId}/participants`),
+            fetch(`${import.meta.env.VITE_API_URL}/rooms/${roomId}/nudges`),
+          ]);
 
         if (!roomResponse.ok) {
           throw new Error('Room not found');
@@ -282,6 +306,11 @@ export default function Poster() {
           const { participants: participantData } =
             await participantsResponse.json();
           setParticipants(participantData);
+        }
+
+        if (nudgesResponse.ok) {
+          const { nudges: nudgesData } = await nudgesResponse.json();
+          setNudges(nudgesData);
         }
 
         setError('');
@@ -374,6 +403,7 @@ export default function Poster() {
       roomId={roomId}
       joinUrl={joinUrl}
       participants={participants}
+      nudges={nudges}
     />
   );
 }
