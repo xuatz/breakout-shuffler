@@ -24,6 +24,8 @@ export function TopBar() {
   const isHost =
     typeof window !== 'undefined' && window.location.pathname === '/host';
   const [displayName] = useAtom(displayNameAtom);
+  const [clickCount, setClickCount] = useState(0);
+  const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useNudgesListener(
     useCallback((get, set, newVal, prevVal) => {
@@ -70,6 +72,30 @@ export function TopBar() {
     setIsMenuOpen(false);
   }, [removeCookie, setIsMenuOpen]);
 
+  const handleUserIconClick = useCallback(() => {
+    setIsMenuOpen((prev) => !prev);
+
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
+    }
+
+    const newClickCount = clickCount + 1;
+    setClickCount(newClickCount);
+
+    if (newClickCount > 10 && !cookies._debug) {
+      setCookie('_debug', true, {
+        path: '/',
+        secure: import.meta.env.PROD,
+        domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
+      });
+      setClickCount(0);
+    }
+
+    clickTimerRef.current = setTimeout(() => {
+      setClickCount(0);
+    }, 2000);
+  }, [clickCount, cookies._debug, setCookie]);
+
   const menuOptions: MenuOption[] = [
     ...(isHost
       ? [
@@ -89,29 +115,25 @@ export function TopBar() {
         setIsMenuOpen(false);
       },
     },
-    {
-      label: '⚙️ Debug',
-      onClick: () => {}, // This is just a section header
-    },
-    {
-      label: `${cookies._debug ? 'Disable' : 'Enable'} Debug Mode`,
-      onClick: () => {
-        if (cookies._debug) {
-          setCookie('_debug', false, {
-            path: '/',
-            secure: import.meta.env.PROD,
-            domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
-          });
-        } else {
-          setCookie('_debug', true, {
-            path: '/',
-            secure: import.meta.env.PROD,
-            domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
-          });
-        }
-        setIsMenuOpen(false);
-      },
-    },
+    ...(cookies._debug
+      ? [
+          {
+            label: '⚙️ Debug',
+            onClick: () => {},
+          },
+          {
+            label: 'Disable Debug Mode',
+            onClick: () => {
+              setCookie('_debug', false, {
+                path: '/',
+                secure: import.meta.env.PROD,
+                domain: import.meta.env.VITE_COOKIE_DOMAIN || '.breakout.local',
+              });
+              setIsMenuOpen(false);
+            },
+          },
+        ]
+      : []),
     {
       label: 'Clear Cookies',
       onClick: handleClearCookies,
@@ -124,7 +146,7 @@ export function TopBar() {
       <div className="flex justify-end items-center gap-2 relative">
         <button
           ref={userIconRef}
-          onClick={() => setIsMenuOpen((prev) => !prev)}
+          onClick={handleUserIconClick}
           className={`w-8 h-8 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white flex items-center justify-center transition-colors ${
             isWiggling ? 'animate-wiggle' : ''
           }`}
