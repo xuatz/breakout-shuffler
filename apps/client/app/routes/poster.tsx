@@ -189,7 +189,8 @@ function ActiveBreakoutView({
 }: ActiveBreakoutViewProps) {
   const getGridColumns = (groupCount: number) => {
     if (groupCount <= 4) return 'grid-cols-2';
-    if (groupCount <= 8) return 'grid-cols-3';
+    if (groupCount <= 8) return 'grid-cols-4';
+    if (groupCount <= 12) return 'grid-cols-4';
     return 'grid-cols-4';
   };
 
@@ -207,56 +208,52 @@ function ActiveBreakoutView({
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
-      <div className="max-w-[1600px] mx-auto">
-        <div className="mb-8 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-3">
+      <div className="max-w-[2560px] mx-auto">
+        <div className="mb-3 bg-white dark:bg-gray-800 p-2 rounded-lg shadow">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Room: {roomId}
               </h1>
-              <p className="text-2xl text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 {participants.length} Participants • {groupEntries.length}{' '}
                 Groups
               </p>
             </div>
-            <span className="inline-flex items-center px-8 py-4 rounded-full text-3xl font-bold bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-              <span className="w-5 h-5 bg-green-500 rounded-full mr-4 animate-pulse"></span>
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
               Breakout Active
             </span>
           </div>
         </div>
 
-        <div className={`grid ${gridCols} gap-6`}>
+        <div className={`grid ${gridCols} gap-2`}>
           {groupedParticipants.map(({ groupId, members }) => {
             const colorScheme = GROUP_COLORS[groupId % GROUP_COLORS.length];
             return (
               <div
                 key={groupId}
-                className={`bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border-4 ${colorScheme.border}`}
+                className={`bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden border-2 ${colorScheme.border}`}
               >
-                <div className={`${colorScheme.bg} ${colorScheme.text} p-6`}>
-                  <h2 className="text-4xl font-bold text-center">
+                <div className={`${colorScheme.bg} ${colorScheme.text} p-2`}>
+                  <h2 className="text-lg font-bold text-center">
                     Group {groupId + 1}
                   </h2>
-                  <p className="text-2xl text-center mt-2 opacity-90">
-                    {members.length}{' '}
-                    {members.length === 1 ? 'Member' : 'Members'}
-                  </p>
                 </div>
-                <div className="p-6">
+                <div className="p-2">
                   {members.length === 0 ? (
-                    <p className="text-2xl text-gray-500 dark:text-gray-400 text-center py-8">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
                       No members
                     </p>
                   ) : (
-                    <ul className="space-y-3">
+                    <ul className="space-y-1">
                       {members.map((member, index) => (
                         <li
                           key={member.id}
-                          className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
+                          className="bg-gray-50 dark:bg-gray-700 p-1.5 rounded"
                         >
-                          <span className="text-2xl font-medium text-gray-900 dark:text-white">
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
                             {index + 1}. {member.displayName}
                           </span>
                         </li>
