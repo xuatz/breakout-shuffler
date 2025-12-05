@@ -12,7 +12,7 @@
     "@hono/node-server": "^1.13.7",
     "@types/socket.io": "^3.0.2",
     "@types/uuid": "^10.0.0",
-    "hono": "^4.6.15",
+    "hono": "^4.10.2",
     "ioredis": "^5.4.2",
     "socket.io": "^4.8.1",
     "uuid": "^11.0.3"
