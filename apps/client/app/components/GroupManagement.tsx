@@ -57,8 +57,8 @@ export function GroupManagement({
 
   const handleNudgeUser = () => {
     if (selectedUser) {
+      // TODO: Implement nudge user socket event - tracked in separate issue
       console.log('Nudging user:', selectedUser.id);
-      console.log('TODO: Implement nudge user socket event');
     }
   };
 

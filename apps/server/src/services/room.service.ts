@@ -68,34 +68,33 @@ export class RoomService {
 
     // If room is in active state with groups, assign user to smallest group
     if (room.state === 'active' && room.groups) {
-      const groupSizes: { [groupId: string]: number } = {};
-      for (const groupId in room.groups) {
-        groupSizes[groupId] = room.groups[groupId].length;
-      }
-
-      // Find the smallest group
-      let smallestGroupId = '0';
+      // Find the smallest group in a single pass
+      let smallestGroupId: string | null = null;
       let smallestSize = Infinity;
-      for (const groupId in groupSizes) {
-        if (groupSizes[groupId] < smallestSize) {
-          smallestSize = groupSizes[groupId];
+      
+      for (const groupId in room.groups) {
+        const groupSize = room.groups[groupId].length;
+        if (groupSize < smallestSize) {
+          smallestSize = groupSize;
           smallestGroupId = groupId;
         }
       }
 
-      // Add user to smallest group
-      const updatedGroups = { ...room.groups };
-      updatedGroups[smallestGroupId] = [
-        ...updatedGroups[smallestGroupId],
-        userId,
-      ];
+      // Only proceed if we found a group
+      if (smallestGroupId !== null) {
+        const updatedGroups = { ...room.groups };
+        updatedGroups[smallestGroupId] = [
+          ...updatedGroups[smallestGroupId],
+          userId,
+        ];
 
-      const updatedRoom: Room = {
-        ...room,
-        groups: updatedGroups,
-      };
+        const updatedRoom: Room = {
+          ...room,
+          groups: updatedGroups,
+        };
 
-      await this.roomRepository.updateRoom(roomId, updatedRoom);
+        await this.roomRepository.updateRoom(roomId, updatedRoom);
+      }
     }
 
     return true;
