@@ -5,7 +5,7 @@ import { Modal } from './Modal';
 interface GroupLayoutMapProps {
   roomId: string;
   isHost: boolean;
-  layoutData?: string; // Base64 encoded image data
+  layoutData?: string; // JSON string of canvas paths
   onSave?: (data: string) => void;
 }
 
@@ -29,7 +29,12 @@ export function GroupLayoutMap({
   // Load existing layout data when component mounts or layoutData changes
   useEffect(() => {
     if (layoutData && canvasRef.current) {
-      canvasRef.current.loadPaths(layoutData);
+      try {
+        const paths = JSON.parse(layoutData);
+        canvasRef.current.loadPaths(paths);
+      } catch (e) {
+        console.error('Failed to load layout data:', e);
+      }
     }
   }, [layoutData]);
 
@@ -73,7 +78,6 @@ export function GroupLayoutMap({
               strokeColor="black"
               canvasColor="white"
               style={{ borderRadius: '0.375rem' }}
-              readOnly={true}
             />
           </div>
         </div>
@@ -110,64 +114,62 @@ export function GroupLayoutMap({
               strokeColor="black"
               canvasColor="white"
               style={{ borderRadius: '0.375rem' }}
-              readOnly={true}
             />
           </div>
         )}
       </div>
 
-      {showModal && (
-        <Modal
-          title="Draw Group Layout Map"
-          onClose={() => {
-            setShowModal(false);
-            setIsDrawing(false);
-          }}
-        >
-          <div className="flex flex-col gap-4">
-            <div className="border-2 border-gray-300 dark:border-gray-600 rounded">
-              <ReactSketchCanvas
-                ref={canvasRef}
-                width="100%"
-                height="400px"
-                strokeWidth={2}
-                strokeColor="black"
-                canvasColor="white"
-                style={{ borderRadius: '0.375rem' }}
-              />
-            </div>
+      <Modal
+        isOpen={showModal}
+        title="Draw Group Layout Map"
+        onClose={() => {
+          setShowModal(false);
+          setIsDrawing(false);
+        }}
+      >
+        <div className="flex flex-col gap-4">
+          <div className="border-2 border-gray-300 dark:border-gray-600 rounded">
+            <ReactSketchCanvas
+              ref={canvasRef}
+              width="100%"
+              height="400px"
+              strokeWidth={2}
+              strokeColor="black"
+              canvasColor="white"
+              style={{ borderRadius: '0.375rem' }}
+            />
+          </div>
 
-            <div className="flex gap-2 justify-between">
-              <div className="flex gap-2">
-                <button
-                  onClick={handleUndo}
-                  className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                >
-                  Undo
-                </button>
-                <button
-                  onClick={handleRedo}
-                  className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                >
-                  Redo
-                </button>
-                <button
-                  onClick={handleClear}
-                  className="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 transition-colors"
-                >
-                  Clear
-                </button>
-              </div>
+          <div className="flex gap-2 justify-between">
+            <div className="flex gap-2">
               <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
+                onClick={handleUndo}
+                className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
               >
-                Save
+                Undo
+              </button>
+              <button
+                onClick={handleRedo}
+                className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                Redo
+              </button>
+              <button
+                onClick={handleClear}
+                className="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 transition-colors"
+              >
+                Clear
               </button>
             </div>
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
+            >
+              Save
+            </button>
           </div>
-        </Modal>
-      )}
+        </div>
+      </Modal>
     </>
   );
 }

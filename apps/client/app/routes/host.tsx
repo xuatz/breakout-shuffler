@@ -284,10 +284,11 @@ export default function Host() {
                       pattern="[0-9]*"
                       value={groupingMode === 'size' ? groupSize : groupCount}
                       onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
                         if (groupingMode === 'size') {
-                          setGroupSize(e.target.value);
+                          setGroupSize(value);
                         } else {
-                          setGroupCount(e.target.value);
+                          setGroupCount(value);
                         }
                       }}
                       className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
