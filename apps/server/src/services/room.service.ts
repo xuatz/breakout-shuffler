@@ -66,6 +66,38 @@ export class RoomService {
       this.userRepository.updateLiveliness(userId),
     ]);
 
+    // If room is in active state with groups, assign user to smallest group
+    if (room.state === 'active' && room.groups) {
+      const groupSizes: { [groupId: string]: number } = {};
+      for (const groupId in room.groups) {
+        groupSizes[groupId] = room.groups[groupId].length;
+      }
+
+      // Find the smallest group
+      let smallestGroupId = '0';
+      let smallestSize = Infinity;
+      for (const groupId in groupSizes) {
+        if (groupSizes[groupId] < smallestSize) {
+          smallestSize = groupSizes[groupId];
+          smallestGroupId = groupId;
+        }
+      }
+
+      // Add user to smallest group
+      const updatedGroups = { ...room.groups };
+      updatedGroups[smallestGroupId] = [
+        ...updatedGroups[smallestGroupId],
+        userId,
+      ];
+
+      const updatedRoom: Room = {
+        ...room,
+        groups: updatedGroups,
+      };
+
+      await this.roomRepository.updateRoom(roomId, updatedRoom);
+    }
+
     return true;
   }
 
@@ -176,5 +208,46 @@ export class RoomService {
     if (userRooms.includes(roomId)) {
       await this.userRepository.removeUserFromRoom(userId, roomId);
     }
+  }
+
+  async moveUserToGroup(
+    roomId: string,
+    userId: string,
+    targetGroupId: string,
+  ): Promise<Room> {
+    const room = await this.roomRepository.getRoom(roomId);
+    if (!room) {
+      throw new Error('Room not found');
+    }
+
+    if (room.state !== 'active') {
+      throw new Error('Room must be in active state to move users');
+    }
+
+    if (!room.groups) {
+      throw new Error('No groups found in room');
+    }
+
+    // Remove user from their current group (if any)
+    const updatedGroups = { ...room.groups };
+    for (const groupId in updatedGroups) {
+      updatedGroups[groupId] = updatedGroups[groupId].filter(
+        (id) => id !== userId,
+      );
+    }
+
+    // Add user to target group (create group if it doesn't exist)
+    if (!updatedGroups[targetGroupId]) {
+      updatedGroups[targetGroupId] = [];
+    }
+    updatedGroups[targetGroupId].push(userId);
+
+    const updatedRoom: Room = {
+      ...room,
+      groups: updatedGroups,
+    };
+
+    await this.roomRepository.updateRoom(roomId, updatedRoom);
+    return updatedRoom;
   }
 }

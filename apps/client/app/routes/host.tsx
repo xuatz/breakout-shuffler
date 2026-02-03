@@ -10,6 +10,7 @@ import { ErrorMessage } from '../components/ErrorMessage';
 import { sendSocketMessage, socket } from '~/lib/socket';
 import { calculateGroupDistribution } from '~/lib/groupDistribution';
 import { activeRoomAtom, userGroupAtom } from '~/atoms/activeRoom';
+import { GroupManagement } from '../components/GroupManagement';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -326,6 +327,14 @@ export default function Host() {
                       </button>
                     </div>
                   </div>
+                  {activeRoom?.groups && (
+                    <GroupManagement
+                      roomId={roomId}
+                      groups={activeRoom.groups}
+                      participants={participants}
+                      currentUserId={cookies._bsid}
+                    />
+                  )}
                 </>
               )}
 
@@ -361,7 +370,9 @@ export default function Host() {
                 </div>
               )}
 
-              <UserList isHost roomId={roomId} title="Room Users" />
+              {activeRoom?.state === 'waiting' && (
+                <UserList isHost roomId={roomId} title="Room Users" />
+              )}
             </div>
           </div>
         </div>
