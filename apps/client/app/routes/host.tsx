@@ -7,6 +7,7 @@ import { useAtom } from 'jotai';
 import type { Room } from '../types';
 import { UserList } from '../components/UserList';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { GroupLayoutMap } from '../components/GroupLayoutMap';
 import { sendSocketMessage, socket } from '~/lib/socket';
 import { calculateGroupDistribution } from '~/lib/groupDistribution';
 import { activeRoomAtom, userGroupAtom } from '~/atoms/activeRoom';
@@ -28,6 +29,7 @@ export default function Host() {
   const [participants, setParticipants] = useState<any[]>([]);
   const [activeRoom, setActiveRoom] = useAtom(activeRoomAtom);
   const userGroup = useAtom(userGroupAtom)[0];
+  const [layoutMap, setLayoutMap] = useState<string | undefined>();
 
   const roomId = activeRoom?.roomId;
 
@@ -51,6 +53,7 @@ export default function Host() {
                 state: room.state,
                 groups: room.groups,
               });
+              setLayoutMap(room.layoutMap);
               sendSocketMessage('joinRoom', { roomId: room.id });
               sendSocketMessage('getNudges');
             }
@@ -107,16 +110,26 @@ export default function Host() {
       }
     };
 
+    const handleLayoutMapUpdated = ({
+      layoutMap: newLayoutMap,
+    }: {
+      layoutMap: string;
+    }) => {
+      setLayoutMap(newLayoutMap);
+    };
+
     socket.on('roomCreated', handleRoomCreated);
     socket.on('error', handleError);
     socket.on('participantsUpdated', handleParticipantsUpdated);
     socket.on('roomStateUpdated', handleRoomStateUpdated);
+    socket.on('layoutMapUpdated', handleLayoutMapUpdated);
 
     return () => {
       socket.off('roomCreated', handleRoomCreated);
       socket.off('error', handleError);
       socket.off('participantsUpdated', handleParticipantsUpdated);
       socket.off('roomStateUpdated', handleRoomStateUpdated);
+      socket.off('layoutMapUpdated', handleLayoutMapUpdated);
     };
   }, [roomId, setActiveRoom]);
 
@@ -156,6 +169,11 @@ export default function Host() {
   const handleAbortBreakout = () => {
     if (!roomId) return;
     socket.emit('abortBreakout', { roomId });
+  };
+
+  const handleSaveLayoutMap = (data: string) => {
+    if (!roomId) return;
+    socket.emit('updateLayoutMap', { roomId, layoutMap: data });
   };
 
   const baseUrl = import.meta.env.VITE_PUBLIC_URL || window.location.origin;
@@ -266,10 +284,11 @@ export default function Host() {
                       pattern="[0-9]*"
                       value={groupingMode === 'size' ? groupSize : groupCount}
                       onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
                         if (groupingMode === 'size') {
-                          setGroupSize(e.target.value);
+                          setGroupSize(value);
                         } else {
-                          setGroupCount(e.target.value);
+                          setGroupCount(value);
                         }
                       }}
                       className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
@@ -362,6 +381,15 @@ export default function Host() {
               )}
 
               <UserList isHost roomId={roomId} title="Room Users" />
+
+              <div className="mt-4">
+                <GroupLayoutMap
+                  roomId={roomId}
+                  isHost={true}
+                  layoutData={layoutMap}
+                  onSave={handleSaveLayoutMap}
+                />
+              </div>
             </div>
           </div>
         </div>

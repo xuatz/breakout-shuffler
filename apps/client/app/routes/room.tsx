@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Route } from '../+types/root';
 import { useParams } from 'react-router';
 import { useCookies } from 'react-cookie';
@@ -6,6 +6,7 @@ import { useAtom } from 'jotai';
 import { useMachine } from '@xstate/react';
 import { displayNameAtom } from '~/atoms/displayName';
 import { UserList } from '../components/UserList';
+import { GroupLayoutMap } from '../components/GroupLayoutMap';
 import { socket } from '~/lib/socket';
 import { roomMachine } from '~/machines/roomMachine';
 import { generateRandomName } from '@breakout-shuffler/shared';
@@ -22,6 +23,7 @@ export default function Room() {
   const [cookies] = useCookies(['_bsid']);
   const [displayName, setDisplayName] = useAtom(displayNameAtom);
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const [layoutMap, setLayoutMap] = useState<string | undefined>();
 
   // Initialize the XState machine
   const [state, send] = useMachine(roomMachine);
@@ -87,14 +89,24 @@ export default function Room() {
       }
     };
 
+    const handleLayoutMapUpdated = ({
+      layoutMap: newLayoutMap,
+    }: {
+      layoutMap: string;
+    }) => {
+      setLayoutMap(newLayoutMap);
+    };
+
     socket.on('joinedRoom', handleJoinedRoom);
     socket.on('roomStateUpdated', handleRoomStateUpdated);
     socket.on('kicked', handleKicked);
+    socket.on('layoutMapUpdated', handleLayoutMapUpdated);
 
     return () => {
       socket.off('joinedRoom', handleJoinedRoom);
       socket.off('roomStateUpdated', handleRoomStateUpdated);
       socket.off('kicked', handleKicked);
+      socket.off('layoutMapUpdated', handleLayoutMapUpdated);
     };
   }, [roomId, send]);
 
@@ -223,6 +235,16 @@ export default function Room() {
             </div>
           )}
           <UserList roomId={roomId} />
+
+          {layoutMap && (
+            <div className="mt-4">
+              <GroupLayoutMap
+                roomId={roomId}
+                isHost={false}
+                layoutData={layoutMap}
+              />
+            </div>
+          )}
         </div>
       </div>
     );

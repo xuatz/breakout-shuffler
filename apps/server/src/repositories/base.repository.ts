@@ -62,4 +62,12 @@ export abstract class BaseRepository {
   protected async removeFromSet(key: string, member: string): Promise<void> {
     await this.redis.srem(key, member);
   }
+
+  protected async setHashField(
+    key: string,
+    field: string,
+    value: string,
+  ): Promise<void> {
+    await this.redis.hset(key, field, value);
+  }
 }

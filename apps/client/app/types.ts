@@ -13,4 +13,5 @@ export interface Room {
   users: User[];
   state: 'waiting' | 'active';
   groups?: { [groupId: string]: string[] };
+  layoutMap?: string;
 }
