@@ -278,7 +278,8 @@ export default function Poster() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const joinUrl = roomId ? `${window.location.origin}/rooms/${roomId}` : '';
+  const baseUrl = import.meta.env.VITE_PUBLIC_URL || window.location.origin;
+  const joinUrl = roomId ? `${baseUrl}/rooms/${roomId}` : '';
 
   useEffect(() => {
     if (!roomId) return;

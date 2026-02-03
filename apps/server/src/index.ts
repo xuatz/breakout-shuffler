@@ -20,7 +20,9 @@ const origin = [
   'https://client.breakout.local',
   'https://breakout-shuffler.xuatz.com',
   'https://breakout-shuffler.staging.xuatz.com',
-];
+  // Allow additional origins from environment variable (comma-separated)
+  ...(process.env.CORS_ORIGINS?.split(',').map((o) => o.trim()) || []),
+].filter(Boolean);
 
 // Create Redis client
 const redis = new Redis({

@@ -26,40 +26,61 @@ https://github.com/user-attachments/assets/f5aea545-46b0-435b-a3c4-45949166f40c
 
 Because this application shares the cookie between the client and server app, it is probably easier if you just do the whole local dev environment with docker compose, with caddy (and redis) setup already.
 
-1. install docker
-2. docker compose up -d
-3. visit https://client.breakout.local
-
-### Trust self-signed tls cert with mkcert
-
-1. certs are in caddy
-2. https://github.com/FiloSottile/mkcert#installing-the-ca-on-other-systems
-
-## Claude Code Web UI with Tailscale
-
-To expose the Claude Code web UI through Tailscale:
-
-1. Configure Tailscale to accept routes (if needed):
+1. Install Docker
+2. Install [mkcert](https://github.com/FiloSottile/mkcert) for trusted local HTTPS:
+   - **macOS**: `brew install mkcert`
+   - **Linux (Debian/Ubuntu)**: `sudo apt install mkcert`
+   - **Linux (Arch)**: `sudo pacman -S mkcert`
+3. Generate and trust local SSL certificates:
    ```bash
-   sudo tailscale set --accept-routes
+   ./scripts/setup-local-ssl.sh
    ```
-
-2. Login to Tailscale:
+4. Restart your browser (required for the new CA to be recognized)
+5. Start the development environment:
    ```bash
-   sudo tailscale login
+   docker compose up -d
    ```
+6. Visit https://client.breakout.local
 
-3. Start Claude Code web UI:
-   ```bash
-   ./claude-code-webui-linux-x64
-   ```
+## Mobile Testing with Tailscale
 
-4. Expose it through Tailscale (runs in background):
-   ```bash
-   sudo tailscale serve --bg http://localhost:8080
-   ```
+Test on mobile devices via your Tailscale network with valid HTTPS certificates and custom DNS names. Uses [Tailscale Docker containers](https://tailscale.com/kb/1282/docker) as sidecars.
 
-The Claude Code web UI will now be accessible through your Tailscale network.
+### One-time setup
+
+Generate a **reusable** auth key at https://login.tailscale.com/admin/settings/keys
+- Check "Reusable" (allows both containers to use the same key)
+- Check "Ephemeral" (auto-cleanup when containers stop)
+
+### Run the app
+
+Add the auth key to your `.env` file:
+```bash
+TS_AUTHKEY=tskey-auth-xxxxx
+TAILSCALE_DOMAIN=tail1234.ts.net  # Optional: auto-detected if tailscale is running locally
+```
+
+Then run:
+```bash
+./scripts/run-docker-tailscale.sh
+```
+
+The script will also prompt for the key if not found in `.env` or environment.
+
+This will:
+1. Start Tailscale sidecar containers for client and server
+2. Each container gets its own Tailscale identity and HTTPS certificate
+3. Follow Docker logs (Ctrl+C to stop)
+
+Access from your mobile device (connected to Tailscale):
+- Client: `https://breakout-client.<your-tailnet>.ts.net`
+- Server: `https://breakout-server.<your-tailnet>.ts.net`
+
+The QR code will automatically use the correct Tailscale URL.
+
+### Stop the services
+
+Press `Ctrl+C` in the terminal - the script will automatically stop all containers.
 
 ## Workspace Structure
 

@@ -158,7 +158,8 @@ export default function Host() {
     socket.emit('abortBreakout', { roomId });
   };
 
-  const joinUrl = roomId ? `${window.location.origin}/rooms/${roomId}` : '';
+  const baseUrl = import.meta.env.VITE_PUBLIC_URL || window.location.origin;
+  const joinUrl = roomId ? `${baseUrl}/rooms/${roomId}` : '';
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center p-4">
