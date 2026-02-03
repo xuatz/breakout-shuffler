@@ -2,6 +2,7 @@ import { useCookies } from 'react-cookie';
 import type { User } from '../types';
 import { LivelinessIndicator } from './LivelinessIndicator';
 import { twMerge } from 'tailwind-merge';
+import { formatRelativeTime } from '../lib/timeFormat';
 
 interface DisplayNameProps {
   user: User;
@@ -20,10 +21,24 @@ export const DisplayName: React.FC<DisplayNameProps> = ({ user, isHost }) => {
         {isHost && !isYou && (
           <LivelinessIndicator timestamp={user.lastLivelinessUpdateAt} />
         )}
-        <span className={twMerge('ml-2', isYou && 'font-extrabold')}>
-          {user.displayName || user.id}
-          {isYou && ` (this is you!)`}
-        </span>
+        <div className="ml-2 flex-1">
+          <span className={twMerge(isYou && 'font-extrabold')}>
+            {user.displayName || user.id}
+            {isYou && ` (this is you!)`}
+          </span>
+          {isHost && !isYou && (
+            <span
+              className="ml-2 text-sm text-gray-500 dark:text-gray-400"
+              title={
+                user.lastLivelinessUpdateAt
+                  ? new Date(user.lastLivelinessUpdateAt).toLocaleString()
+                  : 'Unknown'
+              }
+            >
+              Last seen: {formatRelativeTime(user.lastLivelinessUpdateAt)}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
