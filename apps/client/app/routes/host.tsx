@@ -304,10 +304,15 @@ export default function Host() {
               ) : (
                 <>
                   {userGroup && (
-                    <div className="w-full p-4 bg-blue-100 dark:bg-blue-900 rounded-lg mb-4">
-                      <p className="text-lg font-semibold text-blue-800 dark:text-blue-100">
-                        You are in Group {userGroup}
-                      </p>
+                    <div className="w-full p-8 bg-blue-600 dark:bg-blue-700 rounded-xl shadow-lg border-4 border-blue-700 dark:border-blue-500 flex items-center justify-center min-h-[180px] mb-4">
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-white/90 dark:text-white/80 mb-2 uppercase tracking-wide">
+                          Your Assignment
+                        </p>
+                        <p className="text-5xl font-bold text-white mb-1">
+                          Group {userGroup}
+                        </p>
+                      </div>
                     </div>
                   )}
                   <div className="w-full p-4 bg-gray-100 dark:bg-gray-700 rounded-lg mb-4">

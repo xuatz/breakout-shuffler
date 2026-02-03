@@ -216,10 +216,15 @@ export default function Room() {
 
         <div className="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-gray-900">
           {state.matches({ joined: 'active' }) && (
-            <div className="mb-6 p-4 bg-blue-100 dark:bg-blue-900 rounded-lg">
-              <p className="text-lg font-semibold text-blue-800 dark:text-blue-100">
-                You are in Group {Number(state.context.userGroup || 0) + 1}
-              </p>
+            <div className="mb-6 p-8 bg-blue-600 dark:bg-blue-700 rounded-xl shadow-lg border-4 border-blue-700 dark:border-blue-500 flex items-center justify-center min-h-[180px]">
+              <div className="text-center">
+                <p className="text-sm font-medium text-white/90 dark:text-white/80 mb-2 uppercase tracking-wide">
+                  Your Assignment
+                </p>
+                <p className="text-5xl font-bold text-white mb-1">
+                  Group {Number(state.context.userGroup || 0) + 1}
+                </p>
+              </div>
             </div>
           )}
           <UserList roomId={roomId} />
