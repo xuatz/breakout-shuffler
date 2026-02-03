@@ -7,6 +7,9 @@ A real-time application that enables hosts to create rooms and participants to j
 - Client: React with Socket.IO client
 - Server: Node.js with Socket.IO for real-time communication
   - Data Store: Redis for room and participant data
+- Shared: Common utilities package (`@breakout-shuffler/shared`) used by both client and server
+
+All packages use ESM (ECMAScript Modules) with `"type": "module"` in package.json.
 
 ## Current Architecture
 
@@ -58,8 +61,7 @@ A real-time application that enables hosts to create rooms and participants to j
        - `createRoom` - handles room creation
        - `participantsUpdated` - broadcasts participant list updates (now includes liveliness data)
        - `nudgeHost` - manages host notifications
-       - `updateLiveliness` - handles client liveliness pings (sent by non-host participants)
-       - `livelinessUpdated` - (Removed, host now polls via HTTP)
+        - `updateLiveliness` - handles client liveliness pings (sent by non-host participants)
 
 ### Client-Side Components
 
@@ -92,10 +94,9 @@ A real-time application that enables hosts to create rooms and participants to j
      - Atoms with listeners for state requiring side effects
      - Defined in `apps/client/app/atoms/` directory
 
-2. **Socket Context (`apps/client/app/context/socket.tsx`)**
-   - Provides socket instance throughout the app
-   - Ensures socket is always available (non-null)
-   - Handles connection lifecycle
+2. **Socket Module (`apps/client/app/lib/socket.ts`)**
+   - Exports singleton socket instance for the app
+   - Configures Socket.IO client connection
 
 3. **Cookie Management**
    - Uses react-cookie for user identification
@@ -262,7 +263,6 @@ host_nudges:{roomId} (hash)
 'participantsUpdated': { participants: User[] }
 'error': { message: string }
 'hostNudged': { nudges: NudgeData[] }
- 'livelinessUpdated': { userId: string, lastLivelinessUpdateAt: string } // (Removed)
 
 // Client -> Server
 'joinRoom': { roomId: string, displayName: string }

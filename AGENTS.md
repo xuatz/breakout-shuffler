@@ -49,9 +49,16 @@ cd apps/server && pnpm test path/to/file.test.ts
 ## Architecture Overview
 
 ### Monorepo Structure
-This is a PNPM workspace monorepo with two main applications:
-- **Client**: React 19 SPA with React Router, XState for state machines, and Jotai for atomic state
-- **Server**: Node.js backend using Hono framework with Socket.io for real-time communication
+This is a PNPM workspace monorepo with:
+- **Client** (`apps/client`): React 19 SPA with React Router, XState for state machines, and Jotai for atomic state
+- **Server** (`apps/server`): Node.js backend using Hono framework with Socket.io for real-time communication
+- **Shared** (`packages/shared`): Shared utilities used by both client and server (e.g., `generateRandomName`)
+
+### Module System
+The project uses **ESM (ECMAScript Modules)** throughout:
+- All packages have `"type": "module"` in package.json
+- TypeScript configured with `module: ESNext` and `moduleResolution: bundler`
+- After `pnpm install`, shared packages are automatically built via `postinstall` script
 
 ### Key Architectural Decisions
 
@@ -83,7 +90,6 @@ This is a PNPM workspace monorepo with two main applications:
 #### Server Structure
 - `apps/server/src/repositories/` - Data access layer
 - `apps/server/src/services/` - Business logic layer
-- `apps/server/src/utils/socket.ts` - Socket.io server setup
 - `apps/server/src/index.ts` - Application entry point
 
 ### Development Workflow
