@@ -7,6 +7,7 @@ export interface Room {
   createdAt: Date;
   state: 'waiting' | 'active';
   groups?: { [groupId: string]: string[] };
+  layoutMap?: string;
 }
 
 export interface User {
@@ -176,5 +177,14 @@ export class RoomService {
     if (userRooms.includes(roomId)) {
       await this.userRepository.removeUserFromRoom(userId, roomId);
     }
+  }
+
+  async updateLayoutMap(roomId: string, layoutMap: string): Promise<void> {
+    const room = await this.roomRepository.getRoom(roomId);
+    if (!room) {
+      throw new Error('Room not found');
+    }
+
+    await this.roomRepository.updateLayoutMap(roomId, layoutMap);
   }
 }

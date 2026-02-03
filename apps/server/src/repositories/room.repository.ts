@@ -13,6 +13,7 @@ export class RoomRepository extends BaseRepository {
         hostId: room.hostId,
         createdAt: room.createdAt.toISOString(),
         state: room.state,
+        layoutMap: room.layoutMap || '',
       }),
       this.addToSet(`participants:${room.id}`, room.hostId),
       this.addToSet(`host_rooms:${room.hostId}`, room.id),
@@ -25,6 +26,7 @@ export class RoomRepository extends BaseRepository {
       hostId: string;
       createdAt: string;
       state: 'waiting' | 'active';
+      layoutMap?: string;
     }>(`room:${roomId}`);
 
     if (!roomData) return undefined;
@@ -37,6 +39,7 @@ export class RoomRepository extends BaseRepository {
       createdAt: new Date(roomData.createdAt),
       state: roomData.state,
       ...(groups && { groups }),
+      ...(roomData.layoutMap && { layoutMap: roomData.layoutMap }),
     };
   }
 
@@ -94,12 +97,13 @@ export class RoomRepository extends BaseRepository {
   }
 
   async updateRoom(roomId: string, room: Room): Promise<void> {
-    const { hostId, createdAt, state, groups } = room;
+    const { hostId, createdAt, state, groups, layoutMap } = room;
 
     await this.setHash(`room:${roomId}`, {
       hostId,
       createdAt: createdAt.toISOString(),
       state,
+      layoutMap: layoutMap || '',
     });
 
     if (groups) {
@@ -167,5 +171,9 @@ export class RoomRepository extends BaseRepository {
         this.redis.del(`room:${roomId}:groups`),
       ]);
     }
+  }
+
+  async updateLayoutMap(roomId: string, layoutMap: string): Promise<void> {
+    await this.setHashField(`room:${roomId}`, 'layoutMap', layoutMap);
   }
 }

@@ -46,6 +46,9 @@ importers:
       react-router:
         specifier: ^7.4.1
         version: 7.10.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-sketch-canvas:
+        specifier: ^6.2.0
+        version: 6.2.0(react@19.0.0)
       socket.io-client:
         specifier: ^4.8.1
         version: 4.8.1
@@ -1533,6 +1536,12 @@ packages:
     peerDependenciesMeta:
       react-dom:
         optional: true
+
+  react-sketch-canvas@6.2.0:
+    resolution: {integrity: sha512-Z56RQN0viV9W3Y+DpZfQMi2lf3pO+UB4l+cMwnx7j7pQ9WHkQwN+qZKVFGANgpjXQMyY42NODF/DXjuKPCMf1w==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>=16.8'
 
   react@19.0.0:
     resolution: {integrity: sha512-V8AVnmPIICiWpGfm6GLzCR/W5FXLchHop40W4nXBmdlEceh16rCN8O8LNWm5bh5XUX91fh7KpA+W0TgMKmgTpQ==}
@@ -3148,6 +3157,10 @@ snapshots:
       set-cookie-parser: 2.7.1
     optionalDependencies:
       react-dom: 19.0.0(react@19.0.0)
+
+  react-sketch-canvas@6.2.0(react@19.0.0):
+    dependencies:
+      react: 19.0.0
 
   react@19.0.0: {}
 

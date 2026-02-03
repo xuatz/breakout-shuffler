@@ -320,6 +320,32 @@ export class SocketService {
           this.handleError(socket, 'Update liveliness error', error);
         }
       });
+
+      // Layout map events
+      socket.on(
+        'updateLayoutMap',
+        async ({ roomId, layoutMap }: { roomId: string; layoutMap: string }) => {
+          try {
+            const userId = this.getUserId(socket);
+            const room = await this.roomService.getRoom(roomId);
+
+            if (!room) {
+              throw new Error('Room not found');
+            }
+
+            if (room.hostId !== userId) {
+              throw new Error('Only the host can update the layout map');
+            }
+
+            await this.roomService.updateLayoutMap(roomId, layoutMap);
+
+            // Broadcast the updated layout map to all participants
+            this.io.to(roomId).emit('layoutMapUpdated', { layoutMap });
+          } catch (error) {
+            this.handleError(socket, 'Update layout map error', error);
+          }
+        },
+      );
     });
   }
 
