@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@breakout-shuffler/shared": "workspace:*",
     "@heroicons/react": "^2.2.0",
     "@react-router/node": "^7.4.1",
     "@react-router/serve": "^7.4.1",

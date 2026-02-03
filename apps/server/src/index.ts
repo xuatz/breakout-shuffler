@@ -11,7 +11,7 @@ import { HTTPException } from 'hono/http-exception';
 import { RoomRepository } from './repositories/room.repository';
 import { UserRepository } from './repositories/user.repository';
 import { NudgeRepository } from './repositories/nudge.repository';
-import { generateRandomName } from './utils/generateRandomName';
+import { generateRandomName } from '@breakout-shuffler/shared';
 
 const origin = [
   'http://localhost:3000',

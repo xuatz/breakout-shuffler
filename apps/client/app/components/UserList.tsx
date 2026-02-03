@@ -128,7 +128,9 @@ export function UserList({
               const animId = Date.now();
               setNudgeAnimations((prev) => [...prev, animId]);
               setTimeout(() => {
-                setNudgeAnimations((prev) => prev.filter((id) => id !== animId));
+                setNudgeAnimations((prev) =>
+                  prev.filter((id) => id !== animId),
+                );
               }, 1000);
             }}
             className="relative px-2 py-1 text-sm bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded transition-colors duration-200"

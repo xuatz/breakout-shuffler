@@ -10,6 +10,9 @@ importers:
 
   apps/client:
     dependencies:
+      '@breakout-shuffler/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@heroicons/react':
         specifier: ^2.2.0
         version: 2.2.0(react@19.0.0)
@@ -89,6 +92,9 @@ importers:
 
   apps/server:
     dependencies:
+      '@breakout-shuffler/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@hono/node-server':
         specifier: ^1.13.7
         version: 1.13.7(hono@4.10.7)
@@ -126,6 +132,12 @@ importers:
       vitest:
         specifier: ^3.0.6
         version: 3.0.6(@types/node@20.17.10)(lightningcss@1.29.1)
+
+  packages/shared:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
 
 packages:
 
@@ -1696,6 +1708,11 @@ packages:
 
   typescript@5.7.2:
     resolution: {integrity: sha512-i5t66RHxDvVN40HfDd1PsEThGNnlMCMT3jMUuoh9/0TaqWevNontacunWyN02LA9/fIbEWlcHZcgTKb9QoaLfg==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -3340,6 +3357,8 @@ snapshots:
       mime-types: 2.1.35
 
   typescript@5.7.2: {}
+
+  typescript@5.9.3: {}
 
   undici-types@6.19.8: {}
 

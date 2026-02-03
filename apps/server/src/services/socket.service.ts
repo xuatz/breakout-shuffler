@@ -3,7 +3,7 @@ import { RoomService } from './room.service';
 import { UserRepository } from '../repositories/user.repository';
 import { NudgeRepository } from '../repositories/nudge.repository';
 import { CookieService } from './cookie.service';
-import { generateRandomName } from '../utils/generateRandomName';
+import { generateRandomName } from '@breakout-shuffler/shared';
 
 interface GroupAllocationRequest {
   roomId: string;

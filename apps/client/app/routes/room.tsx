@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { Route } from '../+types/root';
 import { useParams } from 'react-router';
 import { useCookies } from 'react-cookie';
@@ -6,9 +6,9 @@ import { useAtom } from 'jotai';
 import { useMachine } from '@xstate/react';
 import { displayNameAtom } from '~/atoms/displayName';
 import { UserList } from '../components/UserList';
-import { ErrorMessage } from '../components/ErrorMessage';
 import { socket } from '~/lib/socket';
 import { roomMachine } from '~/machines/roomMachine';
+import { generateRandomName } from '@breakout-shuffler/shared';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -21,7 +21,7 @@ export default function Room() {
   const { roomId } = useParams();
   const [cookies] = useCookies(['_bsid']);
   const [displayName, setDisplayName] = useAtom(displayNameAtom);
-  const [error, setError] = useState('');
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize the XState machine
   const [state, send] = useMachine(roomMachine);
@@ -33,6 +33,26 @@ export default function Room() {
     if (roomId) {
       send({ type: 'JOIN', roomId });
     }
+  };
+
+  const handleShuffleName = () => {
+    setDisplayName(generateRandomName());
+    if (nameInputRef.current) {
+      nameInputRef.current.setCustomValidity('');
+    }
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setDisplayName(value);
+    // Clear custom validity on change so validation can re-run
+    e.target.setCustomValidity('');
+  };
+
+  const handleNameInvalid = (e: React.InvalidEvent<HTMLInputElement>) => {
+    e.target.setCustomValidity(
+      'Please enter a name or click shuffle to generate one',
+    );
   };
 
   // Check if user is already in room
@@ -102,33 +122,47 @@ export default function Room() {
 
         <div className="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-gray-900">
           <form onSubmit={handleJoinRoom} className="space-y-4">
-            {error && (
-              <div className="mb-4">
-                <ErrorMessage message={error} />
-              </div>
-            )}
             <div>
-              <div className="flex justify-between items-center mb-1">
-                <label
-                  htmlFor="userName"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              <label
+                htmlFor="userName"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Your Name
+              </label>
+              <div className="flex gap-2">
+                <input
+                  ref={nameInputRef}
+                  type="text"
+                  id="userName"
+                  value={displayName}
+                  onChange={handleNameChange}
+                  onInvalid={handleNameInvalid}
+                  required
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm 
+                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter your name"
+                />
+                <button
+                  type="button"
+                  onClick={handleShuffleName}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                            bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300
+                            hover:bg-gray-50 dark:hover:bg-gray-600
+                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                            transition-colors"
+                  title="Generate random name"
                 >
-                  Your Name
-                </label>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Optional - we'll generate one if empty
-                </span>
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 18c-.83 0-1.5-.67-1.5-1.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm0-9C6.67 9 6 8.33 6 7.5S6.67 6 7.5 6 9 6.67 9 7.5 8.33 9 7.5 9zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5S15.67 6 16.5 6s1.5.67 1.5 1.5S17.33 9 16.5 9z" />
+                  </svg>
+                </button>
               </div>
-              <input
-                type="text"
-                id="userName"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm 
-                          bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter your name (optional)"
-              />
             </div>
             <button
               type="submit"

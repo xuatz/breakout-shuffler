@@ -289,7 +289,9 @@ export default function Poster() {
         const [roomResponse, participantsResponse, nudgesResponse] =
           await Promise.all([
             fetch(`${import.meta.env.VITE_API_URL}/rooms/${roomId}`),
-            fetch(`${import.meta.env.VITE_API_URL}/rooms/${roomId}/participants`),
+            fetch(
+              `${import.meta.env.VITE_API_URL}/rooms/${roomId}/participants`,
+            ),
             fetch(`${import.meta.env.VITE_API_URL}/rooms/${roomId}/nudges`),
           ]);
 
