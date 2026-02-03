@@ -8,6 +8,9 @@ interface HostActionModalProps {
   isOpen: boolean;
   onNudge: () => void;
   onKick: () => void;
+  onMoveToGroup?: (groupId: string) => void;
+  availableGroups?: string[];
+  currentGroup?: string;
   onClose: () => void;
 }
 
@@ -16,6 +19,9 @@ export const HostActionModal: React.FC<HostActionModalProps> = ({
   isOpen,
   onNudge,
   onKick,
+  onMoveToGroup,
+  availableGroups,
+  currentGroup,
   onClose,
 }) => {
   return (
@@ -34,6 +40,31 @@ export const HostActionModal: React.FC<HostActionModalProps> = ({
         >
           Nudge User
         </button>
+        {onMoveToGroup && availableGroups && availableGroups.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              Move to Group:
+            </p>
+            {availableGroups.map((groupId) => (
+              <button
+                key={groupId}
+                onClick={() => {
+                  onMoveToGroup(groupId);
+                  onClose();
+                }}
+                className={`w-full px-4 py-2 rounded transition-colors ${
+                  currentGroup === groupId
+                    ? 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 cursor-default'
+                    : 'bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white'
+                }`}
+                disabled={currentGroup === groupId}
+              >
+                Group {Number(groupId) + 1}
+                {currentGroup === groupId && ' (Current)'}
+              </button>
+            ))}
+          </div>
+        )}
         <button
           onClick={() => {
             onKick();

@@ -114,4 +114,138 @@ describe('RoomService', () => {
       expect(result.groups).toBeDefined();
     });
   });
+
+  describe('moveUserToGroup', () => {
+    const mockActiveRoom: Room = {
+      id: 'room-1',
+      hostId: 'host-1',
+      createdAt: new Date(),
+      state: 'active',
+      groups: {
+        '0': ['user-1', 'user-2'],
+        '1': ['user-3', 'user-4'],
+      },
+    };
+
+    it('throws error if room not found', async () => {
+      vi.spyOn(roomRepository, 'getRoom').mockResolvedValue(undefined);
+
+      await expect(
+        roomService.moveUserToGroup('room-1', 'user-1', '1'),
+      ).rejects.toThrow('Room not found');
+    });
+
+    it('throws error if room is not in active state', async () => {
+      vi.spyOn(roomRepository, 'getRoom').mockResolvedValue(mockRoom);
+
+      await expect(
+        roomService.moveUserToGroup('room-1', 'user-1', '1'),
+      ).rejects.toThrow('Room must be in active state to move users');
+    });
+
+    it('throws error if no groups found in room', async () => {
+      const activeRoomWithoutGroups: Room = {
+        ...mockRoom,
+        state: 'active',
+      };
+      vi.spyOn(roomRepository, 'getRoom').mockResolvedValue(
+        activeRoomWithoutGroups,
+      );
+
+      await expect(
+        roomService.moveUserToGroup('room-1', 'user-1', '1'),
+      ).rejects.toThrow('No groups found in room');
+    });
+
+    it('moves user from one group to another', async () => {
+      vi.spyOn(roomRepository, 'getRoom').mockResolvedValue(mockActiveRoom);
+      const updateRoomSpy = vi
+        .spyOn(roomRepository, 'updateRoom')
+        .mockResolvedValue();
+
+      const result = await roomService.moveUserToGroup(
+        'room-1',
+        'user-1',
+        '1',
+      );
+
+      expect(result.groups!['0']).toEqual(['user-2']); // user-1 removed from group 0
+      expect(result.groups!['1']).toEqual(['user-3', 'user-4', 'user-1']); // user-1 added to group 1
+      expect(updateRoomSpy).toHaveBeenCalledWith('room-1', result);
+    });
+
+    it('creates new group if target group does not exist', async () => {
+      vi.spyOn(roomRepository, 'getRoom').mockResolvedValue(mockActiveRoom);
+      const updateRoomSpy = vi
+        .spyOn(roomRepository, 'updateRoom')
+        .mockResolvedValue();
+
+      const result = await roomService.moveUserToGroup(
+        'room-1',
+        'user-1',
+        '2',
+      );
+
+      expect(result.groups!['0']).toEqual(['user-2']); // user-1 removed from group 0
+      expect(result.groups!['2']).toEqual(['user-1']); // new group 2 created with user-1
+      expect(updateRoomSpy).toHaveBeenCalledWith('room-1', result);
+    });
+
+    it('handles moving user who is not in any group', async () => {
+      vi.spyOn(roomRepository, 'getRoom').mockResolvedValue(mockActiveRoom);
+      const updateRoomSpy = vi
+        .spyOn(roomRepository, 'updateRoom')
+        .mockResolvedValue();
+
+      const result = await roomService.moveUserToGroup(
+        'room-1',
+        'user-5',
+        '1',
+      );
+
+      expect(result.groups!['1']).toEqual(['user-3', 'user-4', 'user-5']); // user-5 added to group 1
+      expect(updateRoomSpy).toHaveBeenCalledWith('room-1', result);
+    });
+  });
+
+  describe('joinRoom - late joining during active breakout', () => {
+    const mockActiveRoom: Room = {
+      id: 'room-1',
+      hostId: 'host-1',
+      createdAt: new Date(),
+      state: 'active',
+      groups: {
+        '0': ['user-1', 'user-2', 'user-3'],
+        '1': ['user-4'],
+      },
+    };
+
+    beforeEach(() => {
+      roomRepository.addParticipant = vi.fn().mockResolvedValue(undefined);
+      userRepository.addUserToRoom = vi.fn().mockResolvedValue(undefined);
+      userRepository.updateLiveliness = vi.fn().mockResolvedValue(undefined);
+    });
+
+    it('assigns late joiner to smallest group during active breakout', async () => {
+      vi.spyOn(roomRepository, 'getRoom').mockResolvedValue(mockActiveRoom);
+      const updateRoomSpy = vi
+        .spyOn(roomRepository, 'updateRoom')
+        .mockResolvedValue();
+
+      await roomService.joinRoom('room-1', 'user-5');
+
+      expect(updateRoomSpy).toHaveBeenCalled();
+      const updatedRoom = updateRoomSpy.mock.calls[0][1] as Room;
+      expect(updatedRoom.groups!['1']).toContain('user-5'); // Added to group 1 (smallest)
+    });
+
+    it('does not modify groups during waiting state', async () => {
+      vi.spyOn(roomRepository, 'getRoom').mockResolvedValue(mockRoom);
+      const updateRoomSpy = vi.spyOn(roomRepository, 'updateRoom');
+
+      await roomService.joinRoom('room-1', 'user-5');
+
+      expect(updateRoomSpy).not.toHaveBeenCalled(); // No room update in waiting state
+    });
+  });
 });

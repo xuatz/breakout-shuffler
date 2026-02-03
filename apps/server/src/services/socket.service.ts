@@ -17,6 +17,12 @@ interface KickUserRequest {
   targetUserId: string;
 }
 
+interface MoveUserToGroupRequest {
+  roomId: string;
+  userId: string;
+  targetGroupId: string;
+}
+
 export class SocketService {
   private clientMap: Map<string, Socket>;
   private cookieService: CookieService;
@@ -90,6 +96,35 @@ export class SocketService {
         }
       });
 
+      socket.on('moveUserToGroup', async (request: MoveUserToGroupRequest) => {
+        try {
+          const userId = this.getUserId(socket);
+          const room = await this.roomService.getRoom(request.roomId);
+
+          if (!room) {
+            throw new Error('Room not found');
+          }
+
+          if (room.hostId !== userId) {
+            throw new Error('Only the host can move users to groups');
+          }
+
+          const updatedRoom = await this.roomService.moveUserToGroup(
+            request.roomId,
+            request.userId,
+            request.targetGroupId,
+          );
+
+          // Broadcast updated groups to all participants
+          this.io.to(request.roomId).emit('roomStateUpdated', {
+            state: updatedRoom.state,
+            groups: updatedRoom.groups,
+          });
+        } catch (error) {
+          this.handleError(socket, 'Move user to group error', error);
+        }
+      });
+
       // Room events
       socket.on('joinRoom', async ({ roomId }: { roomId: string }) => {
         try {
@@ -105,7 +140,8 @@ export class SocketService {
           // Send current room state to the joining participant
           const room = await this.roomService.getRoom(roomId);
           if (room) {
-            socket.emit('roomStateUpdated', {
+            // Broadcast updated state to all participants (in case user was auto-assigned to a group)
+            this.io.to(roomId).emit('roomStateUpdated', {
               state: room.state,
               groups: room.groups,
             });
