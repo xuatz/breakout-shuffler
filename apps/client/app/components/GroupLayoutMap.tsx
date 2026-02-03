@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { ReactSketchCanvas, type ReactSketchCanvasRef } from 'react-sketch-canvas';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { ReactSketchCanvas, type ReactSketchCanvasRef, type ReactSketchCanvasProps } from 'react-sketch-canvas';
 import { Modal } from './Modal';
 
 interface GroupLayoutMapProps {
@@ -8,6 +8,16 @@ interface GroupLayoutMapProps {
   layoutData?: string; // JSON string of canvas paths
   onSave?: (data: string) => void;
 }
+
+// Canvas configuration
+const CANVAS_CONFIG: Partial<ReactSketchCanvasProps> = {
+  width: '100%',
+  height: '400px',
+  strokeWidth: 2,
+  strokeColor: 'black',
+  canvasColor: 'white',
+  style: { borderRadius: '0.375rem' },
+};
 
 // Detect if the device is desktop (non-touch or has a mouse)
 const isDesktop = () => {
@@ -24,7 +34,9 @@ export function GroupLayoutMap({
   const [isDrawing, setIsDrawing] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
-  const desktop = isDesktop();
+  
+  // Memoize desktop check to avoid recalculating on every render
+  const desktop = useMemo(() => isDesktop(), []);
 
   // Load existing layout data when component mounts or layoutData changes
   useEffect(() => {
@@ -72,12 +84,7 @@ export function GroupLayoutMap({
           <div className="border-2 border-gray-300 dark:border-gray-600 rounded">
             <ReactSketchCanvas
               ref={canvasRef}
-              width="100%"
-              height="400px"
-              strokeWidth={2}
-              strokeColor="black"
-              canvasColor="white"
-              style={{ borderRadius: '0.375rem' }}
+              {...CANVAS_CONFIG}
             />
           </div>
         </div>
@@ -108,12 +115,7 @@ export function GroupLayoutMap({
           <div className="border-2 border-gray-300 dark:border-gray-600 rounded">
             <ReactSketchCanvas
               ref={canvasRef}
-              width="100%"
-              height="400px"
-              strokeWidth={2}
-              strokeColor="black"
-              canvasColor="white"
-              style={{ borderRadius: '0.375rem' }}
+              {...CANVAS_CONFIG}
             />
           </div>
         )}
@@ -131,12 +133,7 @@ export function GroupLayoutMap({
           <div className="border-2 border-gray-300 dark:border-gray-600 rounded">
             <ReactSketchCanvas
               ref={canvasRef}
-              width="100%"
-              height="400px"
-              strokeWidth={2}
-              strokeColor="black"
-              canvasColor="white"
-              style={{ borderRadius: '0.375rem' }}
+              {...CANVAS_CONFIG}
             />
           </div>
 
